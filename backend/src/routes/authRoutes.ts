@@ -1,0 +1,2 @@
+import { Router } from 'express'; import { handleAdminLogin, handleLogin, handleMe, handleRegister } from '../controllers/authController.js'; import { requireAuth } from '../middlewares/auth.js';
+const router = Router(); router.post('/auth/register', handleRegister); router.post('/auth/login', handleLogin); router.post('/auth/admin-login', handleAdminLogin); router.get('/auth/me', requireAuth, handleMe); export { router as authRoutes };

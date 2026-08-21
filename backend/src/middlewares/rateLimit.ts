@@ -1,0 +1,4 @@
+import type { NextFunction, Request, Response } from 'express';
+import { sendError } from '../utils/response.js';
+const hits = new Map<string, { count: number; resetAt: number }>();
+export function rateLimit(limit = 120, windowMs = 60_000) { return (req: Request, res: Response, next: NextFunction) => { const key = `${req.ip}:${req.path.startsWith('/api') ? 'api' : 'other'}`; const now = Date.now(); const current = hits.get(key); const state = !current || current.resetAt <= now ? { count: 0, resetAt: now + windowMs } : current; state.count++; hits.set(key, state); res.setHeader('RateLimit-Limit', limit); res.setHeader('RateLimit-Remaining', Math.max(0, limit - state.count)); if (state.count > limit) return sendError(res, 429, { message: 'Too many requests. Please try again shortly.', code: 'RATE_LIMITED' }); next(); }; }

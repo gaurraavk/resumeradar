@@ -1,0 +1,2 @@
+import { Router } from 'express'; import { createJob, createResume, deleteJob, deleteResume, listJobs, listResumes, updateJob, updateResume } from '../controllers/libraryController.js'; import { requireAuth } from '../middlewares/auth.js';
+const router = Router(); router.use(requireAuth); router.route('/resumes').get(listResumes).post(createResume); router.route('/resumes/:id').patch(updateResume).delete(deleteResume); router.route('/jobs').get(listJobs).post(createJob); router.route('/jobs/:id').patch(updateJob).delete(deleteJob); export { router as libraryRoutes };

@@ -1,0 +1,6 @@
+{
+  "name": "ResumeRadar",
+  "description": "ATS-focused resume optimization platform with precision matching, keyword analysis, and intelligent resume rewriting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

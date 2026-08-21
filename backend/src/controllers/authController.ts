@@ -1,0 +1,7 @@
+import type { NextFunction, Request, Response } from 'express';
+import { login, publicUser, register } from '../services/authService.js';
+import { sendSuccess } from '../utils/response.js';
+export async function handleRegister(req: Request, res: Response, next: NextFunction) { try { const { name, email, password, targetRole } = req.body; if (![name, email, password].every(v => typeof v === 'string') || name.trim().length < 2 || !/^\S+@\S+\.\S+$/.test(email) || password.length < 12) throw Object.assign(new Error('Name, valid email, and a password of at least 12 characters are required'), { statusCode: 400, code: 'VALIDATION_ERROR' }); sendSuccess(res, { data: await register({ name, email, password, targetRole }) }, 201); } catch (e) { next(e); } }
+export async function handleLogin(req: Request, res: Response, next: NextFunction) { try { const { email, password } = req.body; if (typeof email !== 'string' || typeof password !== 'string') throw Object.assign(new Error('Email and password are required'), { statusCode: 400, code: 'VALIDATION_ERROR' }); sendSuccess(res, { data: await login(email, password) }); } catch (e) { next(e); } }
+export async function handleAdminLogin(req: Request, res: Response, next: NextFunction) { try { const { email, password } = req.body; sendSuccess(res, { data: await login(email || '', password || '', true) }); } catch (e) { next(e); } }
+export function handleMe(req: Request, res: Response) { sendSuccess(res, { data: { user: publicUser(req.user!) } }); }

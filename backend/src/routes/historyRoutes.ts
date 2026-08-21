@@ -1,0 +1,1 @@
+import { Router } from 'express'; import { deleteHistory, listHistory } from '../controllers/historyController.js'; import { requireAuth } from '../middlewares/auth.js'; const router = Router(); router.get('/history', requireAuth, listHistory); router.delete('/history/:id', requireAuth, deleteHistory); export { router as historyRoutes };

@@ -1,0 +1,4 @@
+import type { NextFunction, Request, Response } from 'express';
+import { AppError, sendSuccess } from '../utils/response.js'; import { getDb, persist } from '../repositories/store.js';
+export async function listHistory(req: Request, res: Response, next: NextFunction) { try { const data = (await getDb()).history.filter(item => item.userId === req.user!.id && !item.deletedAt).sort((a,b) => b.createdAt.localeCompare(a.createdAt)); sendSuccess(res, { data }); } catch (e) { next(e); } }
+export async function deleteHistory(req: Request, res: Response, next: NextFunction) { try { const item = (await getDb()).history.find(entry => entry.id === req.params.id && entry.userId === req.user!.id && !entry.deletedAt); if (!item) throw new AppError('Record not found', 404, 'NOT_FOUND'); item.deletedAt = new Date().toISOString(); await persist(); sendSuccess(res, { message: 'Record deleted' }); } catch (e) { next(e); } }
