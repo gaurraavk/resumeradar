@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LinkedInProfile, ResumeData } from '../types';
+import { apiFetch } from '../lib/apiClient';
 
 interface LinkedInAuthModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export const LinkedInAuthModal: React.FC<LinkedInAuthModalProps> = ({
 
         try {
           // Fetch the LinkedIn profile from the backend
-          const res = await fetch('/api/linkedin/profile');
+          const res = await apiFetch('/api/linkedin/profile');
           const data = await res.json();
 
           if (data.success && data.profile) {
@@ -98,7 +99,7 @@ export const LinkedInAuthModal: React.FC<LinkedInAuthModalProps> = ({
     setStatusMessage('Opening secure LinkedIn authentication...');
 
     try {
-      const res = await fetch('/api/auth/linkedin/url');
+      const res = await apiFetch('/api/auth/linkedin/url');
       const data = await res.json();
       const authUrl = data.url;
 
@@ -118,7 +119,7 @@ export const LinkedInAuthModal: React.FC<LinkedInAuthModalProps> = ({
         // If popup was blocked, fallback to direct simulator
         setStatusMessage('Popup was blocked by browser. Syncing directly via simulated OAuth token...');
         setTimeout(async () => {
-          const profileRes = await fetch('/api/linkedin/profile');
+          const profileRes = await apiFetch('/api/linkedin/profile');
           const profileData = await profileRes.json();
           if (profileData.success) {
             setSyncedProfile(profileData.profile);
@@ -135,7 +136,7 @@ export const LinkedInAuthModal: React.FC<LinkedInAuthModalProps> = ({
       setStatusMessage('Unable to reach LinkedIn authorization server. Using direct import fallback...');
       
       // Fallback direct load
-      const profileRes = await fetch('/api/linkedin/profile');
+      const profileRes = await apiFetch('/api/linkedin/profile');
       const profileData = await profileRes.json();
       if (profileData.success) {
         setSyncedProfile(profileData.profile);

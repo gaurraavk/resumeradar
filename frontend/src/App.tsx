@@ -46,6 +46,8 @@ import {
   INITIAL_HISTORY,
 } from './data/sampleData';
 
+import { apiFetch } from './lib/apiClient';
+
 const INITIAL_LINKEDIN_PROFILE: LinkedInProfile = {
   id: 'li-alex-morgan',
   fullName: 'Alex Morgan',
@@ -265,7 +267,7 @@ export function App() {
   useEffect(() => {
     const token = localStorage.getItem('resumeradar_token');
     if (!token) { setAuthReady(true); return; }
-    fetch('/api/v1/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch('/api/v1/auth/me', { headers: { Authorization: `Bearer ${token}` } })
       .then(async response => response.ok ? response.json() : Promise.reject())
       .then(result => setCurrentUser(result.data.user))
       .catch(() => localStorage.removeItem('resumeradar_token'))
@@ -464,7 +466,7 @@ export function App() {
   const handleTriggerInstantMatchScan = async () => {
     try {
       const skillsToMatch = activeResume?.skills || linkedInProfile?.skills || ['React', 'TypeScript', 'Node.js'];
-      const res = await fetch('/api/linkedin/match-jobs', {
+      const res = await apiFetch('/api/linkedin/match-jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ skills: skillsToMatch }),
@@ -517,7 +519,7 @@ export function App() {
     setActiveJobTitle(jobTitle);
 
     try {
-      const response = await fetch('/api/analyze', {
+      const response = await apiFetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -573,7 +575,7 @@ export function App() {
     setIsOptimizing(true);
 
     try {
-      const response = await fetch('/api/optimize', {
+      const response = await apiFetch('/api/optimize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiFetch } from '../lib/apiClient';
 
 type RewritingStyle = 'xyz' | 'leadership' | 'technical' | 'concise';
 
@@ -38,7 +39,7 @@ export const BulletRewriteStudio: React.FC<BulletRewriteStudioProps> = ({
   const handleRewrite = async () => {
     setIsRewriting(true);
     try {
-      const response = await fetch('/api/rewrite-bullet', {
+      const response = await apiFetch('/api/rewrite-bullet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

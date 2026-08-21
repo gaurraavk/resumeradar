@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ResumeData } from '../types';
+import { apiFetch } from '../lib/apiClient';
 
 interface CoverLetterGeneratorProps {
   resume: ResumeData;
@@ -24,7 +25,7 @@ export const CoverLetterGenerator: React.FC<CoverLetterGeneratorProps> = ({
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/cover-letter', {
+      const response = await apiFetch('/api/cover-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
