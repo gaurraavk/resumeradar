@@ -1,17 +1,18 @@
 # PROJECT MEMORY
 
 ## Current State
-- Frontend and backend are independent workspace applications.
-- Current phase: separated application verification.
+- Frontend and backend are independent workspace applications with real candidate authentication.
+- Current phase: authentication verification complete.
 
 ## Completed
 - Auth with PBKDF2 and signed bearer tokens; role authorization.
+- Registration requires unique username and mobile number; login accepts username or email only when the password matches.
 - Optional bootstrap super-admin provisioning via `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
 - User-owned resume/job libraries, analysis history, quotas, audit logs, admin APIs.
 - ATS analysis, optimization, cover letter, bullet rewrite, interview, ATS-check, LinkedIn simulator, health APIs.
 
 ## In Progress
-- Frontend production build and standalone backend health endpoint verified after the split.
+- Registration, duplicate prevention, correct/incorrect login, anonymous protected access, frontend build, and standalone backend health endpoint verified.
 
 ## Important Decisions
 - JSON persistence is atomic at `DATA_DIR/resumeradar.json`.

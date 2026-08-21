@@ -14,6 +14,8 @@ Primary versioned prefix: `/api/v1/` (with legacy compatibility aliases on `/api
   {
     "name": "Jane Doe",
     "email": "jane@example.com",
+    "username": "jane_doe",
+    "mobile": "+1 555 123 4567",
     "password": "SecurePassword123",
     "targetRole": "Senior Product Manager"
   }
@@ -43,7 +45,7 @@ Primary versioned prefix: `/api/v1/` (with legacy compatibility aliases on `/api
 * **Request**:
   ```json
   {
-    "email": "jane@example.com",
+    "identifier": "jane_doe",
     "password": "SecurePassword123"
   }
   ```

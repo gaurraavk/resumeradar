@@ -249,6 +249,7 @@ export function App() {
 
   // User Authentication State (defaults to null for new visitors)
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
   // Admin Authentication State
   const [adminUser, setAdminUser] = useState<{ email: string; name: string; role: string } | null>(null);
@@ -261,9 +262,20 @@ export function App() {
     }
   }, [toastAlert]);
 
+  useEffect(() => {
+    const token = localStorage.getItem('resumeradar_token');
+    if (!token) { setAuthReady(true); return; }
+    fetch('/api/v1/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async response => response.ok ? response.json() : Promise.reject())
+      .then(result => setCurrentUser(result.data.user))
+      .catch(() => localStorage.removeItem('resumeradar_token'))
+      .finally(() => setAuthReady(true));
+  }, []);
+
   // Handlers
   const handleNavigate = (tab: string) => {
-    if (tab === 'new-analysis' && !currentUser) {
+    const publicTabs = new Set(['landing', 'user-login', 'admin-login']);
+    if (!publicTabs.has(tab) && !currentUser && tab !== 'admin') {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -280,7 +292,8 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleUserLogin = (user: UserAccount) => {
+  const handleUserLogin = (user: UserAccount, token: string) => {
+    localStorage.setItem('resumeradar_token', token);
     setCurrentUser(user);
     setCurrentTab('dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -299,6 +312,7 @@ export function App() {
   };
 
   const handleUserLogout = () => {
+    localStorage.removeItem('resumeradar_token');
     setCurrentUser(null);
     setCurrentTab('user-login');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -311,6 +325,7 @@ export function App() {
   };
 
   const handleAdminLogout = () => {
+    localStorage.removeItem('resumeradar_admin_token');
     setAdminUser(null);
     setCurrentTab('landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -319,6 +334,10 @@ export function App() {
   React.useEffect(() => {
     (window as any)._navigateToTab = handleNavigate;
   }, [currentUser]);
+
+  useEffect(() => {
+    if (authReady && !currentUser && !['landing', 'user-login', 'admin-login'].includes(currentTab)) setCurrentTab('user-login');
+  }, [authReady, currentUser, currentTab]);
 
   const handleStartNewAnalysis = () => {
     setPrefillResume(null);
@@ -689,7 +708,7 @@ export function App() {
             showSidebar ? 'lg:pl-64' : ''
           }`}
         >
-          {(currentTab === 'landing' || currentTab === 'dashboard') && (
+          {(currentTab === 'landing' || (currentTab === 'dashboard' && currentUser)) && (
             <LandingView
               onStartAnalysis={handleStartNewAnalysis}
               onLoadQuickDemo={handleLoadQuickDemo}
@@ -806,7 +825,7 @@ export function App() {
           {currentTab === 'user-login' && (
             <UserLoginView
               onLoginSuccess={handleUserLogin}
-              onCancel={() => handleNavigate('dashboard')}
+              onCancel={() => handleNavigate('landing')}
               onSwitchToAdmin={() => handleNavigate('admin-login')}
             />
           )}
@@ -818,9 +837,9 @@ export function App() {
             />
           )}
 
-          {currentTab === 'admin-dashboard' && (
+          {currentTab === 'admin-dashboard' && adminUser && (
             <AdminDashboardView
-              adminUser={adminUser || { email: 'admin@resumeradar.io', name: 'Chief Administrator', role: 'Super Administrator' }}
+              adminUser={adminUser}
               history={history}
               resumes={resumes}
               jobs={jobs}
