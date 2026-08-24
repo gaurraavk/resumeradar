@@ -281,7 +281,6 @@ export function App() {
       setIsSignInPromptOpen(true);
       return;
     }
-
     if (tab === 'admin') {
       if (adminUser) {
         setCurrentTab('admin-dashboard');
@@ -317,6 +316,28 @@ export function App() {
     localStorage.removeItem('resumeradar_token');
     setCurrentUser(null);
     setCurrentTab('user-login');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const GUEST_USER: UserAccount = {
+    id: 'guest',
+    name: 'Guest User',
+    email: 'guest@demo.resumeradar',
+    username: 'guest',
+    plan: 'Demo',
+    targetRole: 'Software Engineer',
+    scansRemaining: 3,
+    isGuest: true,
+  };
+
+  const handleGuestLogin = () => {
+    setCurrentUser(GUEST_USER);
+    setCurrentTab('dashboard');
+    setToastAlert({
+      title: 'Welcome to the Demo!',
+      message: 'Exploring as Guest — all features are active with sample data. Sign up to save your work.',
+      type: 'info',
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
