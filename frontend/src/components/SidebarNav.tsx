@@ -75,20 +75,41 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       {/* Bottom User Card & Utility links */}
       <div className="mt-auto pt-3 border-t border-[#cfc4c5]/60 space-y-1.5">
         {user ? (
-          <button
-            onClick={() => onNavigate('user-login')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl bg-white hover:bg-neutral-100 border border-[#cfc4c5]/60 transition-colors text-left cursor-pointer"
-            title="Manage account"
-          >
-            <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
-              {user.name.charAt(0)}
+          user.isGuest ? (
+            /* Guest card */
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-xs font-black shrink-0">
+                  G
+                </span>
+                <div>
+                  <p className="text-xs font-black text-amber-900">Demo / Guest Mode</p>
+                  <p className="text-[10px] text-amber-700">Sample data only</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate('user-login')}
+                className="w-full py-1.5 rounded-lg bg-black text-white text-[11px] font-bold hover:bg-neutral-800 transition-colors"
+              >
+                Sign Up Free →
+              </button>
             </div>
-            <div className="overflow-hidden flex-1">
-              <span className="font-bold text-black text-xs block truncate">{user.name}</span>
-              <span className="text-[10px] text-[#7e7576] block truncate">{user.plan}</span>
-            </div>
-            <span className="material-symbols-outlined text-[16px] text-[#7e7576]">swap_horiz</span>
-          </button>
+          ) : (
+            <button
+              onClick={() => onNavigate('user-login')}
+              className="w-full flex items-center gap-2.5 p-2 rounded-xl bg-white hover:bg-neutral-100 border border-[#cfc4c5]/60 transition-colors text-left cursor-pointer"
+              title="Manage account"
+            >
+              <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold shrink-0">
+                {user.name.charAt(0)}
+              </div>
+              <div className="overflow-hidden flex-1">
+                <span className="font-bold text-black text-xs block truncate">{user.name}</span>
+                <span className="text-[10px] text-[#7e7576] block truncate">{user.plan}</span>
+              </div>
+              <span className="material-symbols-outlined text-[16px] text-[#7e7576]">swap_horiz</span>
+            </button>
+          )
         ) : (
           <button
             onClick={() => onNavigate('user-login')}

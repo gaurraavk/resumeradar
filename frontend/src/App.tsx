@@ -48,6 +48,18 @@ import {
 
 import { apiFetch } from './lib/apiClient';
 
+// Guest/demo user — defined outside component to avoid recreation on every render
+const GUEST_USER: UserAccount = {
+  id: 'guest',
+  name: 'Guest User',
+  email: 'guest@demo.resumeradar',
+  username: 'guest',
+  plan: 'Demo',
+  targetRole: 'Software Engineer',
+  scansRemaining: 3,
+  isGuest: true,
+};
+
 const INITIAL_LINKEDIN_PROFILE: LinkedInProfile = {
   id: 'li-alex-morgan',
   fullName: 'Alex Morgan',
@@ -320,17 +332,6 @@ export function App() {
     setCurrentUser(null);
     setCurrentTab('user-login');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const GUEST_USER: UserAccount = {
-    id: 'guest',
-    name: 'Guest User',
-    email: 'guest@demo.resumeradar',
-    username: 'guest',
-    plan: 'Demo',
-    targetRole: 'Software Engineer',
-    scansRemaining: 3,
-    isGuest: true,
   };
 
   const handleGuestLogin = () => {
@@ -711,6 +712,7 @@ export function App() {
         onNavigate={handleNavigate}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onLogoutUser={handleUserLogout}
+        onGuestLogin={handleGuestLogin}
         onOptimizeForJob={handleOptimizeForLinkedInJob}
         onMarkNotificationRead={handleMarkNotificationRead}
       />

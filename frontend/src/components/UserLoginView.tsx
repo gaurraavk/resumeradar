@@ -20,6 +20,10 @@ interface Props {
   onSwitchToAdmin: () => void;
 }
 
+// Demo credentials — faculty can use these to log in with a real account
+export const DEMO_EMAIL = 'demo@resumeradar.app';
+export const DEMO_PASSWORD = 'Demo@1234';
+
 const passwordMessage =
   'Password must contain at least 8 characters, including uppercase, lowercase, number and special character.';
 const strongPassword = (value: string) =>
@@ -53,6 +57,14 @@ export const UserLoginView: React.FC<Props> = ({
   const set =
     (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) =>
       setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  // Pre-fill the demo credentials so faculty just has to click Login
+  const fillDemoAccount = () => {
+    setMode('signin');
+    setError('');
+    setSuccess('');
+    setForm((f) => ({ ...f, email: DEMO_EMAIL, password: DEMO_PASSWORD }));
+  };
 
   const validate = () => {
     if (mode === 'signup') {
@@ -111,7 +123,6 @@ export const UserLoginView: React.FC<Props> = ({
       }
       onLoginSuccess(result.data.user, result.data.token);
     } catch (err) {
-      // Surface a friendlier message when the backend is unreachable
       const raw = err instanceof Error ? err.message : '';
       const isNetworkError =
         raw.toLowerCase().includes('not valid json') ||
@@ -119,7 +130,7 @@ export const UserLoginView: React.FC<Props> = ({
         raw.toLowerCase().includes('networkerror');
       setError(
         isNetworkError
-          ? 'Cannot reach the server right now. Try again later or continue as a guest to explore the demo.'
+          ? 'Cannot reach the server right now. Use the demo account or continue as a guest below.'
           : raw || 'Unable to authenticate.'
       );
     } finally {
@@ -148,6 +159,7 @@ export const UserLoginView: React.FC<Props> = ({
   return (
     <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center px-4 py-12 bg-[#faf9fe]">
       <div className="w-full max-w-md bg-white p-7 md:p-8 rounded-3xl border border-[#cfc4c5]/60 shadow-xl">
+
         {/* Header */}
         <div className="text-center space-y-2 mb-6">
           <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center font-black text-xl mx-auto">
@@ -162,6 +174,30 @@ export const UserLoginView: React.FC<Props> = ({
               : 'Create a secure account to start optimizing your resume.'}
           </p>
         </div>
+
+        {/* Demo account quick-fill banner — visible on sign-in only */}
+        {mode === 'signin' && (
+          <button
+            type="button"
+            onClick={fillDemoAccount}
+            className="w-full mb-5 flex items-center gap-3 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 hover:border-amber-400 hover:bg-amber-100 transition-all text-left group"
+          >
+            <span className="w-9 h-9 rounded-xl bg-amber-400 text-white flex items-center justify-center shrink-0 shadow-sm text-base font-black">
+              D
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-amber-900 uppercase tracking-wide">
+                Demo Account — Faculty Preview
+              </p>
+              <p className="text-[11px] text-amber-700 truncate mt-0.5">
+                {DEMO_EMAIL} · click to pre-fill
+              </p>
+            </div>
+            <span className="material-symbols-outlined text-[18px] text-amber-500 group-hover:text-amber-700 transition-colors shrink-0">
+              arrow_forward
+            </span>
+          </button>
+        )}
 
         {/* Form */}
         <form onSubmit={submit} className="space-y-1">
@@ -226,7 +262,7 @@ export const UserLoginView: React.FC<Props> = ({
           <div className="flex-1 h-px bg-[#cfc4c5]/40" />
         </div>
 
-        {/* Guest / Demo CTA */}
+        {/* Guest mode — no login required */}
         <button
           type="button"
           onClick={onGuestLogin}
@@ -235,10 +271,10 @@ export const UserLoginView: React.FC<Props> = ({
           <span className="material-symbols-outlined text-[18px] text-[#4c4546] group-hover:text-black transition-colors">
             play_circle
           </span>
-          Continue as Guest — Explore Demo
+          Explore as Guest — No Sign-up Needed
         </button>
         <p className="text-center text-[11px] text-[#7e7576] mt-2">
-          No sign-up needed. Demo data only, nothing is saved.
+          Full demo with sample data. Nothing is saved.
         </p>
 
         {/* Footer links */}

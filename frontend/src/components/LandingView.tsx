@@ -4,11 +4,13 @@ import { SAMPLE_RESUMES, SAMPLE_JOBS } from '../data/sampleData';
 interface LandingViewProps {
   onStartAnalysis: () => void;
   onLoadQuickDemo: (resumeIdx: number, jobIdx: number) => void;
+  onGuestLogin: () => void;
 }
 
 export const LandingView: React.FC<LandingViewProps> = ({
   onStartAnalysis,
   onLoadQuickDemo,
+  onGuestLogin,
 }) => {
   return (
     <div className="w-full flex flex-col items-center">
@@ -28,6 +30,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
             className="bg-black text-white hover:bg-neutral-800 px-8 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-95 cursor-pointer"
           >
             Start Analysis
+          </button>
+
+          <button
+            onClick={onGuestLogin}
+            className="flex items-center gap-2 px-6 py-4 rounded-full border-2 border-dashed border-[#cfc4c5] hover:border-black text-black font-semibold text-xs uppercase tracking-widest transition-all hover:bg-white active:scale-95 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">play_circle</span>
+            Try Demo
           </button>
 
           {/* Quick Demo Preloads */}
