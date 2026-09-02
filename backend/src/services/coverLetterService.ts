@@ -1,4 +1,5 @@
 import { getGeminiClient, generateContentWithFallback, Type } from '../integrations/gemini.js';
+import { hasDeepSeekClient, deepSeekGenerateFromPrompt } from '../integrations/deepseek.js';
 import { logger } from '../config/logger.js';
 
 interface CoverLetterInput {
@@ -42,7 +43,31 @@ Requirements:
         return parsed.coverLetter;
       }
     } catch (e: any) {
-      logger.warn('Cover letter AI generation error', { error: e?.message });
+      logger.warn('Cover letter Gemini error, trying DeepSeek', { error: e?.message });
+    }
+  }
+
+  // DeepSeek fallback
+  if (hasDeepSeekClient()) {
+    try {
+      const prompt = `You are a high-level executive career coach. Write a 1-page high-converting, quantified cover letter for candidate ${resume.name} applying for ${jobTitle} at ${companyName || 'the hiring team'}.
+Writing Tone: ${tone || 'confident'}.
+Resume Summary: ${resume.summary}
+Key Experience: ${JSON.stringify(resume.experience?.slice(0, 2))}
+Job Description: ${jobDescription || jobTitle}
+
+Requirements:
+- Target length: 3-4 structured paragraphs (~280-350 words).
+- Quantify key achievements with metrics.
+- Seamlessly weave in relevant keywords without keyword stuffing.
+Return JSON: { "coverLetter": "<full letter text>" }`;
+
+      const parsed = await deepSeekGenerateFromPrompt(prompt);
+      if (parsed?.coverLetter) {
+        return parsed.coverLetter;
+      }
+    } catch (e: any) {
+      logger.warn('Cover letter DeepSeek error, using template fallback', { error: e?.message });
     }
   }
 

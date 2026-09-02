@@ -1,4 +1,5 @@
 import { getGeminiClient, generateContentWithFallback, Type } from '../integrations/gemini.js';
+import { hasDeepSeekClient, deepSeekGenerateFromPrompt } from '../integrations/deepseek.js';
 import { logger } from '../config/logger.js';
 
 interface BulletRewriteInput {
@@ -49,7 +50,29 @@ Generate 3 variations:
         return parsed.variations;
       }
     } catch (e: any) {
-      logger.warn('Bullet rewrite AI error', { error: e?.message });
+      logger.warn('Bullet rewrite Gemini error, trying DeepSeek', { error: e?.message });
+    }
+  }
+
+  // DeepSeek fallback
+  if (hasDeepSeekClient()) {
+    try {
+      const prompt = `You are a Google hiring committee bar-raiser. Transform this resume bullet point into 3 distinct, high-impact variations following the Google XYZ formula.
+Original Bullet: "${bullet}"
+Style Preference: ${style}
+
+Return JSON: { "variations": [ { "style": "...", "text": "...", "impactScore": 90, "keywords": ["..."] }, ... ] }
+Generate 3 variations:
+1. Google XYZ Formula (Accomplished [X] as measured by [Y], by doing [Z])
+2. Executive & Leadership Focus
+3. Deep Technical & Systems Precision`;
+
+      const parsed = await deepSeekGenerateFromPrompt(prompt);
+      if (parsed?.variations?.length) {
+        return parsed.variations;
+      }
+    } catch (e: any) {
+      logger.warn('Bullet rewrite DeepSeek error, using heuristic fallback', { error: e?.message });
     }
   }
 

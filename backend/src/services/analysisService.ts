@@ -1,4 +1,5 @@
 import { getGeminiClient, generateContentWithFallback, Type } from '../integrations/gemini.js';
+import { hasDeepSeekClient, deepSeekGenerateFromPrompt } from '../integrations/deepseek.js';
 import { logger } from '../config/logger.js';
 
 interface AnalysisInput {
@@ -179,7 +180,24 @@ export async function analyzeResume(input: AnalysisInput) {
         createdAt: new Date().toISOString().split('T')[0],
       };
     } catch (aiErr: any) {
-      logger.warn('Gemini analysis failed, using heuristic engine', { error: aiErr?.message });
+      logger.warn('Gemini analysis failed, trying DeepSeek', { error: aiErr?.message });
+    }
+  }
+
+  // DeepSeek fallback
+  if (hasDeepSeekClient()) {
+    try {
+      const prompt = buildAnalysisPrompt(resumeText, jobDescription);
+      const parsed = await deepSeekGenerateFromPrompt(prompt);
+      return {
+        id: 'analysis-' + Date.now(),
+        jobTitle: jobTitle || 'Target Role',
+        companyName: 'Target Company',
+        ...parsed,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+    } catch (dsErr: any) {
+      logger.warn('DeepSeek analysis failed, using heuristic engine', { error: dsErr?.message });
     }
   }
 

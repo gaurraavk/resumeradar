@@ -6,6 +6,7 @@ export const env = {
   PORT: parseInt(process.env.PORT || '3001', 10),
   NODE_ENV: process.env.NODE_ENV || 'development',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+  DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY || '',
   APP_URL: process.env.APP_URL || '',
   LINKEDIN_CLIENT_ID: process.env.LINKEDIN_CLIENT_ID || '',
   LINKEDIN_CLIENT_SECRET: process.env.LINKEDIN_CLIENT_SECRET || '',
@@ -27,6 +28,9 @@ export const env = {
   },
   get hasGemini(): boolean {
     return !!this.GEMINI_API_KEY;
+  },
+  get hasDeepSeek(): boolean {
+    return !!this.DEEPSEEK_API_KEY;
   },
   get hasLinkedIn(): boolean {
     return !!this.LINKEDIN_CLIENT_ID && !!this.LINKEDIN_CLIENT_SECRET;

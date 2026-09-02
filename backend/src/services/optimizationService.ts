@@ -1,4 +1,5 @@
 import { getGeminiClient, generateContentWithFallback, Type } from '../integrations/gemini.js';
+import { hasDeepSeekClient, deepSeekGenerateFromPrompt } from '../integrations/deepseek.js';
 import { logger } from '../config/logger.js';
 
 interface OptimizationInput {
@@ -104,7 +105,42 @@ export async function optimizeResume(input: OptimizationInput) {
         version: 1,
       };
     } catch (aiErr: any) {
-      logger.warn('Gemini optimization failed, using heuristic optimizer', { error: aiErr?.message });
+      logger.warn('Gemini optimization failed, trying DeepSeek', { error: aiErr?.message });
+    }
+  }
+
+  // DeepSeek fallback
+  if (hasDeepSeekClient()) {
+    try {
+      const prompt = buildOptimizePrompt(resume, jobDescription || '', selectedRecommendations || []);
+      const parsed = await deepSeekGenerateFromPrompt(prompt);
+
+      const optimizedResume = {
+        ...resume,
+        title: resume.title.startsWith('Senior') ? resume.title : `Senior ${resume.title}`,
+        summary: parsed.summary || resume.summary,
+        experience: parsed.experience?.length > 0 ? parsed.experience : resume.experience,
+        skills: parsed.skills?.length > 0 ? parsed.skills : resume.skills,
+        fileName: `${resume.name.replace(/\s+/g, '_')}_Optimized_${(jobTitle || 'Resume').replace(/\s+/g, '_')}.pdf`,
+      };
+
+      return {
+        id: 'opt-' + Date.now(),
+        analysisId: analysisId || 'analysis-1',
+        jobTitle: jobTitle || 'Target Role',
+        originalScore: originalScore || 72,
+        optimizedScore: parsed.optimizedScore || 94,
+        matchRank: parsed.matchRank || 'Top 5% Match',
+        originalResume: resume,
+        optimizedResume,
+        appliedRecommendationsCount: (selectedRecommendations || []).length,
+        highlightedKeywords: parsed.highlightedKeywords || ['React.js', 'TypeScript', 'Tailwind CSS', 'Core Web Vitals'],
+        highlightedActionVerbs: parsed.highlightedActionVerbs || ['Architected', 'Optimized', 'Spearheaded'],
+        timestamp: 'Just now',
+        version: 1,
+      };
+    } catch (dsErr: any) {
+      logger.warn('DeepSeek optimization failed, using heuristic optimizer', { error: dsErr?.message });
     }
   }
 
