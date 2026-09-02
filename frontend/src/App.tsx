@@ -274,10 +274,13 @@ export function App() {
       .finally(() => setAuthReady(true));
   }, []);
 
+  // Helpers
+  const isLoggedIn = !!currentUser; // true for both real users and guests
+
   // Handlers
   const handleNavigate = (tab: string) => {
     const publicTabs = new Set(['landing', 'user-login', 'admin-login']);
-    if (!publicTabs.has(tab) && !currentUser && tab !== 'admin') {
+    if (!publicTabs.has(tab) && !isLoggedIn && tab !== 'admin') {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -359,13 +362,13 @@ export function App() {
   }, [currentUser]);
 
   useEffect(() => {
-    if (authReady && !currentUser && !['landing', 'user-login', 'admin-login'].includes(currentTab)) setCurrentTab('user-login');
-  }, [authReady, currentUser, currentTab]);
+    if (authReady && !isLoggedIn && !['landing', 'user-login', 'admin-login'].includes(currentTab)) setCurrentTab('user-login');
+  }, [authReady, isLoggedIn, currentTab]);
 
   const handleStartNewAnalysis = () => {
     setPrefillResume(null);
     setPrefillJob(null);
-    if (!currentUser) {
+    if (!isLoggedIn) {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -377,7 +380,7 @@ export function App() {
     const j = SAMPLE_JOBS[jobIdx] || SAMPLE_JOBS[0];
     setPrefillResume(r);
     setPrefillJob(j);
-    if (!currentUser) {
+    if (!isLoggedIn) {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -387,7 +390,7 @@ export function App() {
   const handleSelectResumeForAnalysis = (resume: ResumeData) => {
     setPrefillResume(resume);
     setPrefillJob(null);
-    if (!currentUser) {
+    if (!isLoggedIn) {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -397,7 +400,7 @@ export function App() {
   const handleSelectJobForAnalysis = (job: JobDescriptionData) => {
     setPrefillJob(job);
     setPrefillResume(null);
-    if (!currentUser) {
+    if (!isLoggedIn) {
       setIsSignInPromptOpen(true);
       return;
     }
@@ -731,10 +734,11 @@ export function App() {
             showSidebar ? 'lg:pl-64' : ''
           }`}
         >
-          {(currentTab === 'landing' || (currentTab === 'dashboard' && currentUser)) && (
+          {(currentTab === 'landing' || (currentTab === 'dashboard' && isLoggedIn)) && (
             <LandingView
               onStartAnalysis={handleStartNewAnalysis}
               onLoadQuickDemo={handleLoadQuickDemo}
+              onGuestLogin={handleGuestLogin}
             />
           )}
 
@@ -848,6 +852,7 @@ export function App() {
           {currentTab === 'user-login' && (
             <UserLoginView
               onLoginSuccess={handleUserLogin}
+              onGuestLogin={handleGuestLogin}
               onCancel={() => handleNavigate('landing')}
               onSwitchToAdmin={() => handleNavigate('admin-login')}
             />
