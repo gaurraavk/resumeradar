@@ -1,27 +1,22 @@
 import React from 'react';
-import { SAMPLE_RESUMES, SAMPLE_JOBS } from '../data/sampleData';
 
 interface LandingViewProps {
   onStartAnalysis: () => void;
-  onLoadQuickDemo: (resumeIdx: number, jobIdx: number) => void;
-  onGuestLogin: () => void;
 }
 
 export const LandingView: React.FC<LandingViewProps> = ({
   onStartAnalysis,
-  onLoadQuickDemo,
-  onGuestLogin,
 }) => {
   return (
     <div className="w-full flex flex-col items-center">
       {/* Hero Section */}
       <section className="py-16 md:py-24 flex flex-col items-center text-center px-4 max-w-5xl mx-auto">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-extrabold text-black tracking-tight leading-[1.1] max-w-[900px] mb-6">
-          Optimize your resume for any job.
+          Scan your resume against any job description.
         </h1>
 
         <p className="text-base sm:text-lg md:text-[19px] text-[#4c4546] max-w-[700px] mb-10 leading-relaxed">
-          Precision analysis powered by advanced algorithms to ensure your resume beats the ATS and lands in human hands. Get actionable insights in seconds.
+          Deterministic ATS keyword matching coupled with Gemini AI resume critique. Discover missing skills, keyword gaps, and actionable recommendations in seconds.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -31,42 +26,17 @@ export const LandingView: React.FC<LandingViewProps> = ({
           >
             Start Analysis
           </button>
-
-          <button
-            onClick={onGuestLogin}
-            className="flex items-center gap-2 px-6 py-4 rounded-full border-2 border-dashed border-[#cfc4c5] hover:border-black text-black font-semibold text-xs uppercase tracking-widest transition-all hover:bg-white active:scale-95 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">play_circle</span>
-            Try Demo
-          </button>
-
-          {/* Quick Demo Preloads */}
-          <div className="flex items-center gap-2 text-xs text-[#4c4546]">
-            <span>or try sample:</span>
-            <button
-              onClick={() => onLoadQuickDemo(1, 1)}
-              className="px-3 py-1.5 rounded-full bg-white border border-[#cfc4c5] hover:border-black text-black font-medium transition-colors cursor-pointer shadow-2xs"
-            >
-              Frontend Dev
-            </button>
-            <button
-              onClick={() => onLoadQuickDemo(0, 0)}
-              className="px-3 py-1.5 rounded-full bg-white border border-[#cfc4c5] hover:border-black text-black font-medium transition-colors cursor-pointer shadow-2xs"
-            >
-              Product Manager
-            </button>
-          </div>
         </div>
 
         {/* Feature Badges Row */}
         <div className="flex flex-wrap justify-center gap-6 sm:gap-10 mt-14 text-[#4c4546] text-[11px] font-medium items-center uppercase tracking-widest opacity-80">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-black text-[18px]">verified</span>
-            ATS-Friendly
+            Deterministic ATS Scoring
           </div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-black text-[18px]">shield</span>
-            Privacy-First
+            <span className="material-symbols-outlined text-black text-[18px]">psychology</span>
+            Gemini AI Resume Critic
           </div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-black text-[18px]">speed</span>
@@ -82,7 +52,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             The 3-Step Precision Process
           </h2>
           <p className="text-base sm:text-lg text-[#4c4546]">
-            From upload to optimization, a seamless workflow.
+            From resume upload to actionable critique, a seamless workflow.
           </p>
         </div>
 
@@ -94,29 +64,29 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </div>
             <h3 className="text-2xl font-semibold text-black mb-3">1. Upload</h3>
             <p className="text-sm text-[#4c4546] leading-relaxed">
-              Securely upload your current resume and the target job description. We parse formats with high fidelity.
+              Upload your resume (PDF, DOCX, or text) and paste the target job description.
             </p>
           </div>
 
-          {/* Card 2: Analyze */}
+          {/* Card 2: Match */}
           <div className="bg-white border border-[#cfc4c5]/60 rounded-xl p-8 hover:shadow-xl transition-all flex flex-col items-start relative overflow-hidden group">
             <div className="w-14 h-14 bg-[#eeedf3] rounded-xl flex items-center justify-center mb-6 text-black shadow-2xs group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[28px] icon-fill">radar</span>
             </div>
-            <h3 className="text-2xl font-semibold text-black mb-3">2. Analyze</h3>
+            <h3 className="text-2xl font-semibold text-black mb-3">2. ATS Match</h3>
             <p className="text-sm text-[#4c4546] leading-relaxed">
-              Our engine cross-references your skills against the job requirements, identifying critical gaps and keyword matches.
+              Our deterministic Java engine cross-references keywords, skills, and industry terms to compute your real ATS match score.
             </p>
           </div>
 
-          {/* Card 3: Optimize */}
+          {/* Card 3: Critique */}
           <div className="bg-white border border-[#cfc4c5]/60 rounded-xl p-8 hover:shadow-xl transition-all flex flex-col items-start relative overflow-hidden group">
             <div className="w-14 h-14 bg-[#eeedf3] rounded-xl flex items-center justify-center mb-6 text-black shadow-2xs group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined text-[28px] icon-fill">auto_awesome</span>
             </div>
-            <h3 className="text-2xl font-semibold text-black mb-3">3. Optimize</h3>
+            <h3 className="text-2xl font-semibold text-black mb-3">3. AI Critique</h3>
             <p className="text-sm text-[#4c4546] leading-relaxed">
-              Receive targeted recommendations to adjust phrasing, add missing skills, and perfectly align your profile for impact.
+              Get an objective, in-depth evaluation powered by Gemini AI highlighting strengths, weaknesses, and concrete recommendations.
             </p>
           </div>
         </div>

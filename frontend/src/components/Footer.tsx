@@ -14,37 +14,28 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </span>
           <span className="font-bold text-black">ResumeRadar</span>
           <span className="text-[#cfc4c5]">•</span>
-          <span>Precision ATS Optimization</span>
+          <span>Deterministic ATS Keyword Matcher &amp; AI Critic</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-6 font-medium">
           <button onClick={() => onNavigate('landing')} className="hover:text-black transition-colors cursor-pointer">
             Home
           </button>
-          <button onClick={() => onNavigate('resources')} className="hover:text-black transition-colors cursor-pointer">
-            ATS Guide
-          </button>
-          <button onClick={() => onNavigate('insights')} className="hover:text-black transition-colors cursor-pointer">
-            Market Benchmarks
-          </button>
-          <button onClick={() => onNavigate('history')} className="hover:text-black transition-colors cursor-pointer">
-            History
-          </button>
-          <button onClick={() => onNavigate('user-login')} className="hover:text-black transition-colors font-semibold text-neutral-800 cursor-pointer">
-            Sign In
+          <button onClick={() => onNavigate('new-analysis')} className="hover:text-black transition-colors cursor-pointer">
+            ATS Scan
           </button>
           <button
-            onClick={() => onNavigate('admin')}
+            onClick={() => onNavigate('admin-login')}
             className="flex items-center gap-1 hover:text-black transition-colors font-semibold text-neutral-800 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300/80 px-2.5 py-1 rounded-md text-[11px] cursor-pointer"
-            title="Admin Governance Console"
+            title="Admin Console"
           >
             <span className="material-symbols-outlined text-[13px]">shield_person</span>
-            <span>Admin Portal</span>
+            <span>Admin</span>
           </button>
         </div>
 
         <p className="text-[11px]">
-          © {new Date().getFullYear()} ResumeRadar. All rights reserved.
+          © {new Date().getFullYear()} ResumeRadar. Open source ATS and AI critic.
         </p>
       </div>
     </footer>

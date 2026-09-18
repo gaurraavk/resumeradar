@@ -1,8 +1,28 @@
+# Node & Frontend
 node_modules/
-build/
 dist/
+build/
 coverage/
-.DS_Store
+.vite/
 *.log
+
+# Java & Maven
+backend/target/
+target/
+*.class
+*.jar
+*.war
+.m2/
+
+# Environment & Credentials
 .env*
 !.env.example
+*.pem
+*.key
+
+# IDE & OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: resumeradar-backend
+
+resumeradar:
+  admin:
+    email: ${ADMIN_EMAIL:admin@resumeradar.io}
+    password: ${ADMIN_PASSWORD:admin123}
+    jwt-secret: ${JWT_SECRET:ResumeRadarSecretKeyForDevelopmentMustBe32BytesMinLength12345}
+    jwt-expiration-ms: 86400000
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
+    url: https://generativelanguage.googleapis.com/v1beta/models
+  ratelimit:
+    enabled: true
+    requests-per-minute: 30
+
+logging:
+  level:
+    root: INFO
+    com.resumeradar: DEBUG
