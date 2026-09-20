@@ -34,10 +34,37 @@ public class AnalysisController {
         this.sessionStore = sessionStore;
     }
 
-    // Existing text-only endpoint
+    // Existing text-only endpoint - updated to store session in AnalysisSessionStore and support fix/download
     @PostMapping("/analyze")
     public ResponseEntity<ApiResponse<AnalysisResponse>> analyze(@Valid @RequestBody AnalysisRequest request) {
         AnalysisResponse response = analysisService.runAnalysis(request);
+
+        String analysisId = UUID.randomUUID().toString();
+        response.setAnalysisId(analysisId);
+        response.setFormattingWarnings(Collections.emptyList());
+        response.setFormattingNote("Formatting checks require a .docx upload");
+
+        // Feature 1, 2, 3
+        response.setRepeatedKeywordWarnings(atsKeywordService.detectRepeatedKeywords(request.getResumeText()));
+        response.setMissingSections(atsKeywordService.detectMissingSections(request.getResumeText()));
+        ResumeFixService.WeakSentenceAnalysis weak = resumeFixService.analyzeWeakSentences(request.getResumeText());
+        response.setWeakSentenceCount(weak.getWeakSentenceCount());
+        response.setTotalSentenceCount(weak.getTotalSentenceCount());
+        response.setWeakSentenceExamples(weak.getWeakSentenceExamples());
+
+        // Store session for potential auto-fix exactly like /api/v1/analyze-file does
+        AnalysisSession session = new AnalysisSession(
+                request.getResumeText(),
+                null,
+                "resume.docx",
+                true,
+                response.getMissingKeywords(),
+                Collections.emptyList(),
+                request.getJobDescription(),
+                response.getAtsScore()
+        );
+        sessionStore.put(analysisId, session);
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -79,7 +106,8 @@ public class AnalysisController {
         // Store session for potential auto-fix
         AnalysisSession session = new AnalysisSession(
                 resumeText, fileBytes, originalFileName, isDocx,
-                atsResult.getMissingKeywords(), formattingResult.getWarnings()
+                atsResult.getMissingKeywords(), formattingResult.getWarnings(),
+                jobDescription, atsResult.getAtsScore()
         );
         sessionStore.put(analysisId, session);
 
@@ -91,10 +119,18 @@ public class AnalysisController {
                 formattingResult.getWarnings()
         );
 
+        // Feature 1, 2, 3
+        response.setRepeatedKeywordWarnings(atsKeywordService.detectRepeatedKeywords(resumeText));
+        response.setMissingSections(atsKeywordService.detectMissingSections(resumeText));
+        ResumeFixService.WeakSentenceAnalysis weak = resumeFixService.analyzeWeakSentences(resumeText);
+        response.setWeakSentenceCount(weak.getWeakSentenceCount());
+        response.setTotalSentenceCount(weak.getTotalSentenceCount());
+        response.setWeakSentenceExamples(weak.getWeakSentenceExamples());
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // Task 5: Generate fixed resume
+    // Task 5: Generate fixed resume with before/after score comparison
     @PostMapping("/generate-fixed-resume")
     public ResponseEntity<ApiResponse<FixResumeResponse>> generateFixedResume(@RequestBody Map<String, String> request) {
         String analysisId = request.get("analysisId");
@@ -110,13 +146,18 @@ public class AnalysisController {
 
         if (!session.isDocx()) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Auto-fix is only available for .docx uploads."));
+                    .body(ApiResponse.error("Auto-fix is only available for .docx uploads or text resumes. PDF files cannot be rebuilt."));
         }
 
-        List<String> fixesApplied = resumeFixService.generateFixedResume(analysisId);
+        ResumeFixService.FixResult fixResult = resumeFixService.fixResume(analysisId);
         String downloadUrl = "/api/v1/download/fixed-resume/" + analysisId;
 
-        FixResumeResponse response = new FixResumeResponse(fixesApplied, downloadUrl);
+        FixResumeResponse response = new FixResumeResponse(
+                fixResult.getOriginalScore(),
+                fixResult.getImprovedScore(),
+                fixResult.getFixesApplied(),
+                downloadUrl
+        );
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -133,7 +174,14 @@ public class AnalysisController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        String filename = "fixed_" + (session.getOriginalFileName() != null ? session.getOriginalFileName() : "resume.docx");
+        String orig = session.getOriginalFileName();
+        if (orig == null || orig.isBlank()) {
+            orig = "resume.docx";
+        }
+        if (!orig.toLowerCase().endsWith(".docx")) {
+            orig = orig.replaceAll("\\.[^.]+$", "") + ".docx";
+        }
+        String filename = "fixed_" + orig;
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

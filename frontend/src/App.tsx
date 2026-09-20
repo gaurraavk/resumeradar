@@ -134,7 +134,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900 antialiased">
+    <div className="min-h-screen flex flex-col bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#1d1d1f] selection:text-white">
       <TopNav
         currentTab={currentTab}
         onNavigate={handleNavigate}

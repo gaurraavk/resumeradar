@@ -97,6 +97,8 @@ class AnalysisControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(Map.of("analysisId", analysisId))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.originalScore").isNumber())
+                .andExpect(jsonPath("$.data.improvedScore").isNumber())
                 .andExpect(jsonPath("$.data.fixesApplied").isArray())
                 .andExpect(jsonPath("$.data.downloadUrl").value("/api/v1/download/fixed-resume/" + analysisId));
 
@@ -110,6 +112,53 @@ class AnalysisControllerIntegrationTest {
         assertTrue(downloadedBytes.length > 0);
 
         // Verify valid docx
+        try (XWPFDocument fixedDoc = new XWPFDocument(new java.io.ByteArrayInputStream(downloadedBytes))) {
+            assertFalse(fixedDoc.getParagraphs().isEmpty());
+        }
+    }
+
+    @Test
+    void testTextPaste_AutoFix_AndDownloadWorkflow() throws Exception {
+        AnalysisRequest request = new AnalysisRequest();
+        request.setResumeText("Software engineer with experience in Java and SQL databases.");
+        request.setJobDescription("Looking for a Senior Java Developer with Spring Boot and Kubernetes experience.");
+
+        // 1. Call /api/v1/analyze
+        MvcResult analyzeResult = mockMvc.perform(post("/api/v1/analyze")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.analysisId").isNotEmpty())
+                .andExpect(jsonPath("$.data.formattingWarnings").isArray())
+                .andExpect(jsonPath("$.data.formattingNote").value("Formatting checks require a .docx upload"))
+                .andReturn();
+
+        String responseBody = analyzeResult.getResponse().getContentAsString();
+        Map<String, Object> map = objectMapper.readValue(responseBody, Map.class);
+        Map<String, Object> data = (Map<String, Object>) map.get("data");
+        String analysisId = (String) data.get("analysisId");
+
+        // 2. Call /api/v1/generate-fixed-resume using the text analysisId
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("analysisId", analysisId))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.originalScore").isNumber())
+                .andExpect(jsonPath("$.data.improvedScore").isNumber())
+                .andExpect(jsonPath("$.data.fixesApplied").isArray())
+                .andExpect(jsonPath("$.data.downloadUrl").value("/api/v1/download/fixed-resume/" + analysisId));
+
+        // 3. Download the generated fixed resume
+        MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", containsString("fixed_resume.docx")))
+                .andReturn();
+
+        byte[] downloadedBytes = downloadResult.getResponse().getContentAsByteArray();
+        assertTrue(downloadedBytes.length > 0);
+
         try (XWPFDocument fixedDoc = new XWPFDocument(new java.io.ByteArrayInputStream(downloadedBytes))) {
             assertFalse(fixedDoc.getParagraphs().isEmpty());
         }

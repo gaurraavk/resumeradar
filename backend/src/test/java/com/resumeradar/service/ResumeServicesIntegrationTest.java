@@ -197,4 +197,30 @@ class ResumeServicesIntegrationTest {
         assertEquals("Java Backend Engineer", results.get(0).getTitle());
         assertTrue(results.get(0).getMatchScore() > results.get(1).getMatchScore());
     }
+
+    @Test
+    void testTextResumeFix_ComputesScoresAndGeneratesDocx() {
+        String analysisId = UUID.randomUUID().toString();
+        String resumeText = "Software developer experienced in Python and Flask.";
+        String jobDescription = "Looking for a Senior Software Engineer with Python, Flask, Docker, and Kubernetes.";
+
+        AnalysisSessionStore.AnalysisSession session = new AnalysisSessionStore.AnalysisSession(
+                resumeText,
+                null, // plain text
+                "resume.docx",
+                true,
+                List.of("Docker", "Kubernetes"),
+                Collections.emptyList(),
+                jobDescription,
+                40
+        );
+        sessionStore.put(analysisId, session);
+
+        ResumeFixService.FixResult result = resumeFixService.fixResume(analysisId);
+        assertNotNull(result);
+        assertEquals(40, result.getOriginalScore());
+        assertTrue(result.getImprovedScore() >= result.getOriginalScore(), "Improved score should be >= original score");
+        assertNotNull(session.getFixedDocxBytes());
+        assertTrue(session.getFixedDocxBytes().length > 0);
+    }
 }

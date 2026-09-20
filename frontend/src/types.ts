@@ -46,9 +46,17 @@ export interface FormattingWarning {
 }
 
 export interface AnalysisResult {
+  analysisId?: string;
   atsScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
+  formattingWarnings?: FormattingWarning[];
+  formattingNote?: string;
+  repeatedKeywordWarnings?: string[];
+  weakSentenceCount?: number;
+  totalSentenceCount?: number;
+  weakSentenceExamples?: string[];
+  missingSections?: string[];
 }
 
 export interface AnalysisFileResult {
@@ -57,9 +65,17 @@ export interface AnalysisFileResult {
   matchedKeywords: string[];
   missingKeywords: string[];
   formattingWarnings: FormattingWarning[];
+  formattingNote?: string;
+  repeatedKeywordWarnings?: string[];
+  weakSentenceCount?: number;
+  totalSentenceCount?: number;
+  weakSentenceExamples?: string[];
+  missingSections?: string[];
 }
 
 export interface FixResumeResult {
+  originalScore?: number;
+  improvedScore?: number;
   fixesApplied: string[];
   downloadUrl: string;
 }

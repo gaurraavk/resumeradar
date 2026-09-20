@@ -116,27 +116,29 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 md:px-12 py-12 flex flex-col gap-10">
+    <div className="w-full max-w-5xl mx-auto px-6 md:px-12 py-10 flex flex-col gap-10">
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl md:text-4xl font-semibold text-neutral-900 tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight">
           New Analysis
         </h1>
-        <p className="text-base md:text-lg text-neutral-500 max-w-2xl leading-relaxed font-normal">
+        <p className="text-base sm:text-lg text-neutral-500 max-w-2xl leading-relaxed font-normal">
           Upload or paste your resume and provide the target job description to generate your ATS score.
         </p>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6 min-h-[480px]">
         {/* Left Pane: Resume Input */}
-        <section className="flex-1 flex flex-col gap-5 bg-white rounded-2xl p-8 shadow-sm">
+        <section className="flex-1 flex flex-col gap-5 macos-card rounded-3xl p-7 md:p-8 transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-neutral-900">1. Resume Content</h2>
-            <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-xl text-[13px]">
+            <h2 className="text-base font-semibold text-[#1d1d1f]">1. Resume Content</h2>
+            <div className="flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04] text-[13px]">
               <button
                 type="button"
                 onClick={() => setActiveResumeInputMode('upload')}
-                className={`px-3 py-1.5 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
-                  activeResumeInputMode === 'upload' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                className={`px-3.5 py-1 rounded-xl font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+                  activeResumeInputMode === 'upload'
+                    ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
+                    : 'text-neutral-500 hover:text-[#1d1d1f]'
                 }`}
               >
                 Upload File
@@ -144,8 +146,10 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveResumeInputMode('text')}
-                className={`px-3 py-1.5 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
-                  activeResumeInputMode === 'text' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                className={`px-3.5 py-1 rounded-xl font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+                  activeResumeInputMode === 'text'
+                    ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
+                    : 'text-neutral-500 hover:text-[#1d1d1f]'
                 }`}
               >
                 Paste Text
@@ -166,24 +170,24 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
               {!resumeFile && !uploadedFile ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-grow rounded-2xl flex flex-col items-center justify-center p-10 gap-4 bg-neutral-50 hover:bg-neutral-100 transition-all duration-200 cursor-pointer min-h-[280px]"
+                  className="flex-grow rounded-2xl flex flex-col items-center justify-center p-10 gap-4 bg-[#f5f5f7]/80 hover:bg-white border border-dashed border-black/[0.08] hover:border-black/[0.2] transition-all duration-300 cursor-pointer min-h-[280px]"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-neutral-200/60 flex items-center justify-center text-neutral-500">
+                  <div className="w-14 h-14 rounded-2xl bg-white shadow-2xs flex items-center justify-center text-neutral-600 border border-black/[0.04]">
                     <span className="material-symbols-outlined text-3xl">upload_file</span>
                   </div>
                   <div className="text-center">
-                    <p className="text-base text-neutral-900 font-medium">Select Resume File</p>
+                    <p className="text-base text-[#1d1d1f] font-medium">Select Resume File</p>
                     <p className="text-[13px] text-neutral-400 mt-1">Supports PDF, DOCX, TXT</p>
                   </div>
                 </div>
               ) : (
                 <div className="flex-grow flex flex-col justify-between min-h-[280px]">
-                  <div className="flex items-center p-5 bg-neutral-50 rounded-2xl gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <div className="flex items-center p-5 bg-[#f5f5f7] rounded-2xl gap-4 border border-black/[0.04]">
+                    <div className="w-11 h-11 rounded-xl bg-white shadow-2xs flex items-center justify-center text-[#1d1d1f] border border-black/[0.04]">
                       <span className="material-symbols-outlined text-2xl icon-fill">description</span>
                     </div>
                     <div className="flex-grow min-w-0">
-                      <p className="text-sm font-semibold text-neutral-900 truncate">{resumeFile?.fileName || uploadedFile?.name}</p>
+                      <p className="text-sm font-semibold text-[#1d1d1f] truncate">{resumeFile?.fileName || uploadedFile?.name}</p>
                       <p className="text-[13px] text-neutral-400">{resumeFile?.fileSize || (uploadedFile ? (uploadedFile.size / (1024 * 1024)).toFixed(2) + ' MB' : '')}</p>
                       <span className="inline-block mt-1 text-[12px] text-emerald-600 font-medium">
                         ✓ Ready for analysis
@@ -191,29 +195,29 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
                     </div>
                     <button
                       onClick={handleResetFile}
-                      className="text-neutral-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 transition-all duration-200 cursor-pointer"
+                      className="text-neutral-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 transition-all duration-300 cursor-pointer active:scale-[0.98]"
                       title="Remove file"
                     >
                       <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>
                   </div>
                   {resumeFile?.rawText && (
-                    <div className="mt-4 p-4 rounded-xl bg-neutral-50 text-[13px] text-neutral-500">
-                      <p className="font-medium text-neutral-700 mb-1">Preview:</p>
-                      <p className="line-clamp-3 font-mono text-[12px]">{resumeFile.rawText.slice(0, 400)}...</p>
+                    <div className="mt-4 p-4 rounded-xl bg-[#f5f5f7] text-[13px] text-neutral-500 border border-black/[0.04]">
+                      <p className="font-medium text-[#1d1d1f] mb-1">Preview:</p>
+                      <p className="line-clamp-3 font-mono text-[12px] leading-relaxed">{resumeFile.rawText.slice(0, 400)}...</p>
                     </div>
                   )}
                 </div>
               )}
             </>
           ) : (
-            <div className="flex-grow flex flex-col gap-1.5 min-h-[280px]">
+            <div className="flex-grow flex flex-col gap-2 min-h-[280px]">
               <textarea
                 value={manualResumeText}
                 onChange={(e) => setManualResumeText(e.target.value)}
                 rows={12}
                 placeholder="Paste the full text of your resume here..."
-                className="w-full flex-grow resize-none rounded-2xl p-4 text-sm bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-neutral-900/10 outline-none transition-all duration-200 leading-relaxed custom-scrollbar font-normal border-0"
+                className="w-full flex-grow resize-none rounded-2xl p-4 text-sm bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] outline-none transition-all duration-300 leading-relaxed custom-scrollbar font-normal"
               />
               <div className="flex justify-between items-center px-1 text-[13px] text-neutral-400">
                 <span>{manualResumeText.trim().length >= 50 ? '✓ Ready' : 'Minimum 50 characters required.'}</span>
@@ -224,31 +228,31 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
         </section>
 
         {/* Right Pane: Job Description */}
-        <section className="flex-1 flex flex-col gap-5 bg-white rounded-2xl p-8 shadow-sm">
+        <section className="flex-1 flex flex-col gap-5 macos-card rounded-3xl p-7 md:p-8 transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-neutral-900">2. Target Role</h2>
-            <span className="text-[12px] font-medium bg-neutral-900 text-white px-3 py-1 rounded-2xl">
+            <h2 className="text-base font-semibold text-[#1d1d1f]">2. Target Role</h2>
+            <span className="text-[12px] font-medium bg-[#1d1d1f] text-white px-3 py-1 rounded-full shadow-2xs">
               Job Description
             </span>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3.5">
             <input
               type="text"
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
               placeholder="Target Job Title (optional)"
-              className="w-full rounded-xl p-3 text-sm bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-neutral-900/10 outline-none transition-all duration-200 border-0"
+              className="w-full rounded-2xl px-4 py-3 text-sm bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] outline-none transition-all duration-300 font-normal"
             />
 
-            <div className="flex-grow flex flex-col gap-1.5 relative">
+            <div className="flex-grow flex flex-col gap-2 relative">
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 rows={10}
                 maxLength={5000}
                 placeholder="Paste the target job description here..."
-                className="w-full min-h-[220px] resize-none rounded-2xl p-4 text-sm bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-neutral-900/10 outline-none transition-all duration-200 leading-relaxed custom-scrollbar font-normal border-0"
+                className="w-full min-h-[220px] resize-none rounded-2xl p-4 text-sm bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] outline-none transition-all duration-300 leading-relaxed custom-scrollbar font-normal"
               />
 
               <div className="flex justify-between items-center mt-1 px-1">
@@ -260,7 +264,7 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
                   )}
                 </div>
                 <span className="text-[13px] font-medium text-neutral-400">
-                  <span className="text-neutral-600">{charCount}</span> / 5000
+                  <span className="text-[#1d1d1f]">{charCount}</span> / 5000
                 </span>
               </div>
             </div>
@@ -269,14 +273,14 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
       </div>
 
       {/* Action Area */}
-      <div className="flex justify-end pt-4 pb-12">
+      <div className="flex justify-end pt-2 pb-12">
         <button
           onClick={handleSubmit}
           disabled={!isReady || isLoading}
-          className={`text-[15px] font-medium py-3.5 px-10 rounded-2xl transition-all duration-200 flex items-center gap-3 ${
+          className={`text-[15px] font-medium py-3.5 px-10 rounded-2xl transition-all duration-300 flex items-center gap-2.5 ${
             isReady && !isLoading
-              ? 'bg-neutral-900 text-white cursor-pointer hover:bg-neutral-700 active:scale-[0.97]'
-              : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              ? 'bg-[#1d1d1f] text-white cursor-pointer hover:bg-neutral-800 active:scale-[0.98] shadow-[0_2px_12px_rgba(0,0,0,0.12)]'
+              : 'bg-black/[0.06] text-neutral-400 cursor-not-allowed'
           }`}
         >
           {isLoading ? (

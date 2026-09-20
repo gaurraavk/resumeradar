@@ -143,4 +143,77 @@ public class AtsKeywordService {
         Pattern pattern = Pattern.compile("(?<![a-z0-9])" + Pattern.quote(keyword) + "(?![a-z0-9])");
         return pattern.matcher(normalizedText).find();
     }
+
+    private static final Map<String, String> COMMON_SECTIONS = new LinkedHashMap<>();
+    static {
+        COMMON_SECTIONS.put("education", "Education");
+        COMMON_SECTIONS.put("experience", "Experience");
+        COMMON_SECTIONS.put("skills", "Skills");
+        COMMON_SECTIONS.put("projects", "Projects");
+        COMMON_SECTIONS.put("certifications", "Certifications");
+    }
+
+    /**
+     * Feature 3: Check if the resume contains common section headings (case-insensitive).
+     * Returns list of missing section names (e.g. ["Projects", "Certifications"]).
+     */
+    public List<String> detectMissingSections(String resumeText) {
+        if (resumeText == null || resumeText.isBlank()) {
+            return new ArrayList<>(COMMON_SECTIONS.values());
+        }
+
+        List<String> missing = new ArrayList<>();
+        for (Map.Entry<String, String> entry : COMMON_SECTIONS.entrySet()) {
+            String keyword = entry.getKey();
+            Pattern pattern = Pattern.compile("(?i)\\b" + Pattern.quote(keyword) + "s?\\b");
+            if (!pattern.matcher(resumeText).find()) {
+                missing.add(entry.getValue());
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * Feature 1: Count keyword frequency in resume text. Flag any keyword appearing > 6 times
+     * as a potential keyword stuffing risk.
+     */
+    public List<String> detectRepeatedKeywords(String resumeText) {
+        if (resumeText == null || resumeText.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        Pattern tokenPattern = Pattern.compile("\\b[a-zA-Z0-9#+./-]{2,25}\\b");
+        Matcher matcher = tokenPattern.matcher(resumeText);
+
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        Map<String, String> displayNames = new HashMap<>();
+
+        while (matcher.find()) {
+            String rawToken = matcher.group();
+            String lower = rawToken.toLowerCase();
+
+            if (lower.matches("^\\d+$") || STOP_WORDS.contains(lower)) {
+                continue;
+            }
+            if (lower.length() <= 2 && !lower.equals("c#") && !lower.equals("r") && !lower.equals("go") && !lower.equals("ui") && !lower.equals("ux")) {
+                continue;
+            }
+
+            counts.put(lower, counts.getOrDefault(lower, 0) + 1);
+            if (!displayNames.containsKey(lower)) {
+                displayNames.put(lower, rawToken);
+            }
+        }
+
+        List<String> warnings = new ArrayList<>();
+        counts.entrySet().stream()
+                .filter(e -> e.getValue() > 6)
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .forEach(e -> {
+                    String name = displayNames.getOrDefault(e.getKey(), e.getKey());
+                    warnings.add(String.format("The word '%s' appears %d times — this may look unnatural to ATS systems, consider reducing it.", name, e.getValue()));
+                });
+
+        return warnings;
+    }
 }

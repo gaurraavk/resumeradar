@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TopNavProps {
   currentTab: string;
@@ -13,40 +13,61 @@ export const TopNav: React.FC<TopNavProps> = ({
   isAdminLoggedIn = false,
   onAdminLogout,
 }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between w-full px-6 sm:px-8 md:px-12 h-14 bg-white/80 backdrop-blur-xl">
+    <nav
+      className={`sticky top-0 z-50 flex items-center justify-between w-full px-6 sm:px-8 md:px-12 h-14 transition-all duration-300 ${
+        isScrolled ? 'macos-glass-scrolled' : 'macos-glass'
+      }`}
+    >
       <div className="flex items-center gap-8">
         <button
           onClick={() => onNavigate('landing')}
-          className="flex items-center gap-2 font-semibold text-lg text-neutral-900 tracking-tight hover:opacity-70 transition-opacity duration-200 cursor-pointer"
+          className="flex items-center gap-2.5 font-semibold text-base text-[#1d1d1f] tracking-tight hover:opacity-80 transition-opacity duration-300 cursor-pointer active:scale-[0.98]"
         >
-          <span className="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center text-[11px] font-black">
+          <span className="w-6 h-6 rounded-lg bg-[#1d1d1f] text-white flex items-center justify-center text-[10px] font-semibold tracking-tight shadow-sm">
             RR
           </span>
-          <span>ResumeRadar</span>
+          <span className="font-semibold tracking-tight">ResumeRadar</span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-1">
+        <div className="hidden sm:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
           <button
             onClick={() => onNavigate('landing')}
-            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
-              currentTab === 'landing' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'landing'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
             }`}
           >
             Overview
           </button>
           <button
             onClick={() => onNavigate('new-analysis')}
-            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
-              currentTab === 'new-analysis' || currentTab === 'analysis-result' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'new-analysis' || currentTab === 'analysis-result'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
             }`}
           >
             ATS Scan
           </button>
           <button
             onClick={() => onNavigate('best-fit')}
-            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
-              currentTab === 'best-fit' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'best-fit'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
             }`}
           >
             Best Fit
@@ -54,10 +75,10 @@ export const TopNav: React.FC<TopNavProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <button
           onClick={() => onNavigate('new-analysis')}
-          className="inline-flex items-center gap-1.5 bg-neutral-900 text-white text-[13px] font-medium px-4 py-2 rounded-2xl hover:bg-neutral-700 transition-all duration-200 active:scale-[0.97] cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-[#1d1d1f] text-white text-[13px] font-medium px-4 py-1.5 rounded-2xl hover:bg-neutral-800 transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-sm"
         >
           <span className="material-symbols-outlined text-[15px]">add</span>
           <span>New Scan</span>
@@ -67,15 +88,17 @@ export const TopNav: React.FC<TopNavProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => onNavigate('admin-dashboard')}
-              className={`text-[13px] font-medium px-3 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer ${
-                currentTab === 'admin-dashboard' ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100'
+              className={`text-[13px] font-medium px-3.5 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+                currentTab === 'admin-dashboard'
+                  ? 'bg-[#1d1d1f] text-white shadow-sm'
+                  : 'text-neutral-600 hover:bg-black/[0.04]'
               }`}
             >
               Dashboard
             </button>
             <button
               onClick={onAdminLogout}
-              className="text-[13px] font-medium text-red-500 hover:text-red-700 px-2 py-1 transition-colors duration-200 cursor-pointer"
+              className="text-[13px] font-medium text-rose-600 hover:text-rose-700 px-2 py-1 transition-colors duration-300 cursor-pointer active:scale-[0.98]"
             >
               Sign Out
             </button>
@@ -83,8 +106,10 @@ export const TopNav: React.FC<TopNavProps> = ({
         ) : (
           <button
             onClick={() => onNavigate('admin-login')}
-            className={`flex items-center gap-1 text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
-              currentTab === 'admin-login' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+            className={`flex items-center gap-1 text-[13px] font-medium px-3 py-1.5 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'admin-login'
+                ? 'bg-[#1d1d1f] text-white shadow-sm'
+                : 'text-neutral-500 hover:text-[#1d1d1f] hover:bg-black/[0.04]'
             }`}
           >
             <span className="material-symbols-outlined text-[14px]">shield_person</span>
