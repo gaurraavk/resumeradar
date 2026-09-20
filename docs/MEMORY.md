@@ -1,37 +1,29 @@
 # PROJECT MEMORY
 
 ## Current State
-- Frontend and backend are independent workspace applications with real candidate authentication.
-- Current phase: authentication verification complete.
+- Frontend and backend are independent workspace applications.
+- Backend: Java 21 / Spring Boot 3.3.4, deterministic ATS engine, formatting detection, auto-fix engine.
+- Frontend: React 19 + TypeScript + Tailwind CSS + Vite.
 
 ## Completed
-- Auth with PBKDF2 and signed bearer tokens; role authorization.
-- Registration requires unique username and mobile number; login accepts username or email only when the password matches.
-- Optional bootstrap super-admin provisioning via `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
-- User-owned resume/job libraries, analysis history, quotas, audit logs, admin APIs.
-- ATS analysis, optimization, cover letter, bullet rewrite, interview, ATS-check, LinkedIn simulator, health APIs.
-
-## In Progress
-- Registration, duplicate prevention, correct/incorrect login, anonymous protected access, frontend build, and standalone backend health endpoint verified.
+- JWT-based admin authentication.
+- Deterministic ATS keyword matching engine.
+- Formatting detection (fonts, tables, margins) for .docx uploads.
+- Auto-fix engine: font standardization, table conversion, action verb replacement, missing skills injection.
+- Best-fit multi-job comparison endpoint.
+- PDF text extraction via Apache PDFBox.
+- DOCX reading/writing via Apache POI.
 
 ## Important Decisions
-- JSON persistence is atomic at `DATA_DIR/resumeradar.json`.
-- AI features fall back to deterministic results if Gemini is unavailable.
+- All features are deterministic, rule-based Java logic only — zero AI/ML dependencies.
+- In-memory session store (ConcurrentHashMap) for analysis sessions — no database required.
+- Action verb replacements are dictionary-based (action-verbs.json), never generating new content.
 
 ## Important Constraints
-- Set a 32+ character `TOKEN_SECRET`; authentication intentionally returns 503 without one.
-- Live LinkedIn requires credentials; otherwise simulator mode is used.
-
-## Known Issues
-- No live LinkedIn job-feed API integration is possible without provider credentials/approved API access.
-
-## Next Actions
-- Configure production environment variables and add integration tests in CI.
+- Set a 32+ character `JWT_SECRET` for production.
 
 ## Important Files
-- `frontend/`: React/Vite frontend (proxies API requests to port 3001 in development).
-- `backend/`: Express API application (defaults to port 3001).
-- `backend/.env.example`: backend environment-variable template.
-- `backend/src/app.ts`: API app and security middleware.
-- `backend/src/repositories/store.ts`: atomic persistence.
-- `backend/src/services/authService.ts`: passwords and tokens.
+- `frontend/`: React/Vite frontend (proxies API requests to port 8080 in development).
+- `backend/`: Spring Boot API application (defaults to port 8080).
+- `backend/src/main/resources/action-verbs.json`: weak-to-strong verb dictionary.
+- `backend/src/main/resources/application.yml`: application configuration.

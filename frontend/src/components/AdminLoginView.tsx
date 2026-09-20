@@ -1,8 +1,109 @@
 import React, { useState } from 'react';
 import { apiFetch } from '../lib/apiClient';
-interface Props { onLoginSuccess: (user: { email: string; name: string; role: string }) => void; onCancel: () => void; }
+
+interface Props {
+  onLoginSuccess: (user: { email: string; name: string; role: string }) => void;
+  onCancel: () => void;
+}
+
 export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) => {
-  const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [show, setShow] = useState(false); const [error, setError] = useState(''); const [loading, setLoading] = useState(false);
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); setError(''); if (!email.trim() || !password) return setError('Email and password are required.'); setLoading(true); try { const response = await apiFetch('/api/v1/auth/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Admin login failed.'); localStorage.setItem('resumeradar_admin_token', result.data.token); onLoginSuccess({ email: result.data.user.email, name: result.data.user.name, role: result.data.user.role }); } catch (err) { setError(err instanceof Error ? err.message : 'Admin login failed.'); } finally { setLoading(false); } };
-  return <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center px-4 py-12 bg-[#faf9fe]"><div className="w-full max-w-md bg-white p-8 rounded-3xl border border-[#cfc4c5]/60 shadow-lg"><div className="text-center space-y-2 mb-8"><div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center font-extrabold text-xl mx-auto">RR</div><h1 className="text-2xl font-black text-black">Admin Portal</h1><p className="text-xs text-[#7e7576]">Sign in with a provisioned administrator account.</p></div>{error && <p role="alert" className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">{error}</p>}<form onSubmit={submit} className="space-y-4"><label className="block text-xs font-bold uppercase tracking-wider">Admin Email<input type="email" required value={email} onChange={event => setEmail(event.target.value)} className="mt-1.5 w-full bg-[#faf9fe] border border-[#cfc4c5]/80 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-black" /></label><label className="block text-xs font-bold uppercase tracking-wider">Password<div className="relative mt-1.5"><input type={show ? 'text' : 'password'} required value={password} onChange={event => setPassword(event.target.value)} className="w-full bg-[#faf9fe] border border-[#cfc4c5]/80 rounded-xl px-3.5 py-2.5 pr-16 text-sm focus:outline-none focus:border-black" /><button type="button" onClick={() => setShow(value => !value)} className="absolute right-3 top-2.5 text-xs font-bold text-[#0058bc]">{show ? 'Hide' : 'Show'}</button></div></label><button disabled={loading} className="w-full bg-black text-white font-bold text-sm py-3 rounded-xl disabled:opacity-50">{loading ? 'Authenticating…' : 'Sign In to Admin Console'}</button><button type="button" onClick={onCancel} className="w-full text-xs font-semibold text-[#7e7576] hover:text-black">Return to Application</button></form></div></div>;
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [show, setShow] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    if (!email.trim() || !password) return setError('Email and password are required.');
+    setLoading(true);
+    try {
+      const response = await apiFetch('/api/v1/auth/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Admin login failed.');
+      localStorage.setItem('resumeradar_admin_token', result.data.token);
+      onLoginSuccess({
+        email: result.data.user.email,
+        name: result.data.user.name,
+        role: result.data.user.role,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Admin login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center px-6 py-12 bg-neutral-50">
+      <div className="w-full max-w-md bg-white p-10 rounded-2xl shadow-sm">
+        <div className="text-center space-y-2 mb-8">
+          <div className="w-11 h-11 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-lg mx-auto">
+            RR
+          </div>
+          <h1 className="text-2xl font-semibold text-neutral-900">Admin Portal</h1>
+          <p className="text-[13px] text-neutral-400">Sign in with your administrator account.</p>
+        </div>
+
+        {error && (
+          <p role="alert" className="mb-5 p-3 rounded-xl bg-red-50 text-red-600 text-[13px]">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={submit} className="space-y-4">
+          <label className="block text-[13px] font-medium text-neutral-600">
+            Admin Email
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1.5 w-full bg-neutral-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 transition-all duration-200 border-0"
+            />
+          </label>
+
+          <label className="block text-[13px] font-medium text-neutral-600">
+            Password
+            <div className="relative mt-1.5">
+              <input
+                type={show ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-neutral-50 rounded-xl px-4 py-3 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 transition-all duration-200 border-0"
+              />
+              <button
+                type="button"
+                onClick={() => setShow((v) => !v)}
+                className="absolute right-3 top-3 text-[13px] font-medium text-neutral-500 hover:text-neutral-900 cursor-pointer transition-colors duration-200"
+              >
+                {show ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </label>
+
+          <button
+            disabled={loading}
+            className="w-full bg-neutral-900 text-white font-medium text-[14px] py-3 rounded-2xl disabled:opacity-50 hover:bg-neutral-700 transition-all duration-200 cursor-pointer active:scale-[0.98]"
+          >
+            {loading ? 'Authenticating…' : 'Sign In'}
+          </button>
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="w-full text-[13px] font-medium text-neutral-400 hover:text-neutral-900 transition-colors duration-200 cursor-pointer mt-2"
+          >
+            Return to Application
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };

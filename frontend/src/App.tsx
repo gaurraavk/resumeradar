@@ -5,20 +5,22 @@ import { NewAnalysisView } from './components/NewAnalysisView';
 import { AnalysisResultView } from './components/AnalysisResultView';
 import { AdminLoginView } from './components/AdminLoginView';
 import { AdminDashboardView } from './components/AdminDashboardView';
+import { BestFitView } from './components/BestFitView';
 import { Footer } from './components/Footer';
 
 import {
   ResumeData,
   AnalysisResult,
+  AnalysisFileResult,
 } from './types';
 
-import { apiFetch } from './lib/apiClient';
+import { apiFetch, apiUpload } from './lib/apiClient';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<string>('landing');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [currentResume, setCurrentResume] = useState<ResumeData | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | AnalysisFileResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // Admin state
@@ -44,6 +46,7 @@ export function App() {
     setCurrentTab('landing');
   };
 
+  // Text-only analysis (existing endpoint)
   const handleRunAnalysis = async (resume: ResumeData, jobDescription: string, jobTitle: string) => {
     setIsAnalyzing(true);
     setAnalysisError(null);
@@ -84,8 +87,54 @@ export function App() {
     }
   };
 
+  // File upload analysis (new endpoint)
+  const handleRunFileAnalysis = async (file: File, jobDescription: string, jobTitle: string) => {
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    setCurrentResume({
+      id: 'file-' + Date.now(),
+      name: file.name.replace(/\.[^/.]+$/, ''),
+      title: 'Uploaded Candidate',
+      email: '',
+      phone: '',
+      location: '',
+      summary: '',
+      fileName: file.name,
+      fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+      createdAt: new Date().toISOString().split('T')[0],
+      skills: [],
+      experience: [],
+      rawText: '',
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('jobDescription', jobDescription);
+      formData.append('jobTitle', jobTitle || 'Target Role');
+
+      const response = await apiUpload('/api/v1/analyze-file', formData);
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({ message: 'Analysis failed.' }));
+        throw new Error(errJson.message || `Analysis failed with status ${response.status}`);
+      }
+
+      const resData = await response.json();
+      const payload: AnalysisFileResult = resData.data ?? resData;
+
+      setAnalysisResult(payload);
+      setCurrentTab('analysis-result');
+    } catch (err) {
+      console.error('File analysis error:', err);
+      setAnalysisError(err instanceof Error ? err.message : 'File analysis failed. Please check backend status.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf9fe] text-neutral-900 font-sans antialiased">
+    <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900 antialiased">
       <TopNav
         currentTab={currentTab}
         onNavigate={handleNavigate}
@@ -95,10 +144,10 @@ export function App() {
 
       <main className="flex-1 flex flex-col">
         {analysisError && (
-          <div className="max-w-4xl mx-auto mt-4 px-4 w-full">
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
+          <div className="max-w-4xl mx-auto mt-4 px-6 w-full">
+            <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-[13px] flex items-center justify-between">
               <span>{analysisError}</span>
-              <button onClick={() => setAnalysisError(null)} className="font-bold underline cursor-pointer">
+              <button onClick={() => setAnalysisError(null)} className="font-semibold underline cursor-pointer">
                 Dismiss
               </button>
             </div>
@@ -112,6 +161,7 @@ export function App() {
         {currentTab === 'new-analysis' && (
           <NewAnalysisView
             onRunAnalysis={handleRunAnalysis}
+            onRunFileAnalysis={handleRunFileAnalysis}
             isLoading={isAnalyzing}
           />
         )}
@@ -122,6 +172,10 @@ export function App() {
             resume={currentResume}
             onNewScan={() => handleNavigate('new-analysis')}
           />
+        )}
+
+        {currentTab === 'best-fit' && (
+          <BestFitView />
         )}
 
         {currentTab === 'admin-login' && (

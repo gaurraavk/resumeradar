@@ -1,6 +1,6 @@
 {
   "name": "ResumeRadar",
-  "description": "ATS-focused resume optimization platform with precision matching, keyword analysis, and intelligent resume rewriting.",
+  "description": "ATS-focused resume optimization platform with precision matching, keyword analysis, and rule-based resume optimization.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

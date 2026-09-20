@@ -7,17 +7,13 @@ public class AnalysisResponse {
     private int atsScore;
     private List<String> matchedKeywords;
     private List<String> missingKeywords;
-    private AiCritique aiCritique;
-    private String aiError;
 
     public AnalysisResponse() {}
 
-    public AnalysisResponse(int atsScore, List<String> matchedKeywords, List<String> missingKeywords, AiCritique aiCritique, String aiError) {
+    public AnalysisResponse(int atsScore, List<String> matchedKeywords, List<String> missingKeywords) {
         this.atsScore = atsScore;
         this.matchedKeywords = matchedKeywords;
         this.missingKeywords = missingKeywords;
-        this.aiCritique = aiCritique;
-        this.aiError = aiError;
     }
 
     public int getAtsScore() {
@@ -42,21 +38,5 @@ public class AnalysisResponse {
 
     public void setMissingKeywords(List<String> missingKeywords) {
         this.missingKeywords = missingKeywords;
-    }
-
-    public AiCritique getAiCritique() {
-        return aiCritique;
-    }
-
-    public void setAiCritique(AiCritique aiCritique) {
-        this.aiCritique = aiCritique;
-    }
-
-    public String getAiError() {
-        return aiError;
-    }
-
-    public void setAiError(String aiError) {
-        this.aiError = aiError;
     }
 }

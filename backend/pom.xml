@@ -15,7 +15,7 @@
     <artifactId>resumeradar-backend</artifactId>
     <version>1.0.0</version>
     <name>ResumeRadar Backend</name>
-    <description>Deterministic ATS Keyword Matcher &amp; Gemini AI Resume Critic</description>
+    <description>Deterministic ATS Keyword Matcher and Resume Auto-Fix Engine</description>
 
     <properties>
         <java.version>21</java.version>
@@ -64,6 +64,20 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- PDF text extraction -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.30</version>
+        </dependency>
+
+        <!-- DOCX reading/writing -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
         </dependency>
 
         <!-- Testing -->

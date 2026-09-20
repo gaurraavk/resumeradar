@@ -40,17 +40,32 @@ export interface JobDescriptionData {
   createdAt: string;
 }
 
-export interface AiCritique {
-  overallReview: string;
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
+export interface FormattingWarning {
+  issue: string;
+  detail: string;
 }
 
 export interface AnalysisResult {
   atsScore: number;
   matchedKeywords: string[];
   missingKeywords: string[];
-  aiCritique: AiCritique | null;
-  aiError?: string;
+}
+
+export interface AnalysisFileResult {
+  analysisId: string;
+  atsScore: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  formattingWarnings: FormattingWarning[];
+}
+
+export interface FixResumeResult {
+  fixesApplied: string[];
+  downloadUrl: string;
+}
+
+export interface BestFitResult {
+  title: string;
+  matchScore: number;
+  missingKeywords: string[];
 }

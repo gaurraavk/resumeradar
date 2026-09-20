@@ -14,62 +14,68 @@ export const TopNav: React.FC<TopNavProps> = ({
   onAdminLogout,
 }) => {
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between w-full px-4 sm:px-6 md:px-8 h-16 bg-[#faf9fe]/95 backdrop-blur-md border-b border-[#cfc4c5]/60">
-      {/* Brand & Left Links */}
-      <div className="flex items-center gap-6 md:gap-8">
+    <nav className="sticky top-0 z-50 flex items-center justify-between w-full px-6 sm:px-8 md:px-12 h-14 bg-white/80 backdrop-blur-xl">
+      <div className="flex items-center gap-8">
         <button
           onClick={() => onNavigate('landing')}
-          className="flex items-center gap-2.5 font-bold text-xl md:text-2xl text-black tracking-tight hover:opacity-85 transition-opacity cursor-pointer shrink-0"
+          className="flex items-center gap-2 font-semibold text-lg text-neutral-900 tracking-tight hover:opacity-70 transition-opacity duration-200 cursor-pointer"
         >
-          <span className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center text-sm font-black shadow-sm">
+          <span className="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center text-[11px] font-black">
             RR
           </span>
           <span>ResumeRadar</span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="hidden sm:flex items-center gap-1">
           <button
             onClick={() => onNavigate('landing')}
-            className={`text-xs sm:text-sm font-medium transition-colors px-2 py-1 cursor-pointer ${
-              currentTab === 'landing' ? 'text-black font-semibold border-b-2 border-black' : 'text-[#4c4546] hover:text-black'
+            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
+              currentTab === 'landing' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
             }`}
           >
             Overview
           </button>
           <button
             onClick={() => onNavigate('new-analysis')}
-            className={`text-xs sm:text-sm font-medium transition-colors px-2 py-1 cursor-pointer ${
-              currentTab === 'new-analysis' || currentTab === 'analysis-result' ? 'text-black font-semibold border-b-2 border-black' : 'text-[#4c4546] hover:text-black'
+            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
+              currentTab === 'new-analysis' || currentTab === 'analysis-result' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
             }`}
           >
             ATS Scan
           </button>
+          <button
+            onClick={() => onNavigate('best-fit')}
+            className={`text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
+              currentTab === 'best-fit' ? 'text-neutral-900 bg-neutral-100' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+            }`}
+          >
+            Best Fit
+          </button>
         </div>
       </div>
 
-      {/* Right Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <button
           onClick={() => onNavigate('new-analysis')}
-          className="inline-flex items-center gap-1.5 bg-black text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-neutral-800 transition-all shadow-sm active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-neutral-900 text-white text-[13px] font-medium px-4 py-2 rounded-2xl hover:bg-neutral-700 transition-all duration-200 active:scale-[0.97] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[16px]">add</span>
+          <span className="material-symbols-outlined text-[15px]">add</span>
           <span>New Scan</span>
         </button>
 
         {isAdminLoggedIn ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => onNavigate('admin-dashboard')}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
-                currentTab === 'admin-dashboard' ? 'bg-black text-white border-black' : 'text-black border-neutral-300 hover:bg-neutral-100'
+              className={`text-[13px] font-medium px-3 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer ${
+                currentTab === 'admin-dashboard' ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100'
               }`}
             >
               Dashboard
             </button>
             <button
               onClick={onAdminLogout}
-              className="text-xs font-medium text-red-600 hover:text-red-800 px-2 py-1 transition-colors cursor-pointer"
+              className="text-[13px] font-medium text-red-500 hover:text-red-700 px-2 py-1 transition-colors duration-200 cursor-pointer"
             >
               Sign Out
             </button>
@@ -77,11 +83,11 @@ export const TopNav: React.FC<TopNavProps> = ({
         ) : (
           <button
             onClick={() => onNavigate('admin-login')}
-            className={`flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-              currentTab === 'admin-login' ? 'bg-black text-white font-semibold' : 'text-[#4c4546] hover:text-black hover:bg-neutral-100'
+            className={`flex items-center gap-1 text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
+              currentTab === 'admin-login' ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
             }`}
           >
-            <span className="material-symbols-outlined text-[15px]">shield_person</span>
+            <span className="material-symbols-outlined text-[14px]">shield_person</span>
             <span>Admin</span>
           </button>
         )}

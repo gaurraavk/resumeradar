@@ -8,3 +8,10 @@ const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   return fetch(`${BASE}${path}`, init);
 }
+
+export async function apiUpload(path: string, formData: FormData): Promise<Response> {
+  return fetch(`${BASE}${path}`, {
+    method: 'POST',
+    body: formData,
+  });
+}

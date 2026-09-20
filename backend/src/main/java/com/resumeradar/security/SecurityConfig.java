@@ -37,7 +37,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/analyze", "/api/v1/auth/admin-login", "/healthz").permitAll()
+                        .requestMatchers(
+                                "/api/v1/analyze",
+                                "/api/v1/analyze-file",
+                                "/api/v1/generate-fixed-resume",
+                                "/api/v1/download/fixed-resume/**",
+                                "/api/v1/best-fit",
+                                "/api/v1/auth/admin-login",
+                                "/healthz"
+                        ).permitAll()
                         .requestMatchers("/api/v1/auth/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )

@@ -2,7 +2,7 @@
   "name": "resumeradar",
   "private": true,
   "version": "1.0.0",
-  "description": "ResumeRadar: Open source ATS keyword matching engine and Gemini AI resume critique",
+  "description": "ResumeRadar: Open source ATS keyword matching engine and resume auto-fix tool",
   "workspaces": [
     "frontend"
   ],
