@@ -27,6 +27,7 @@ public class AnalysisController {
     private final TemplateResumeService templateResumeService;
     private final ResumeComparisonService resumeComparisonService;
     private final ResumeQualityService resumeQualityService;
+    private final HistoryService historyService;
 
     @org.springframework.beans.factory.annotation.Autowired
     public AnalysisController(AnalysisService analysisService,
@@ -37,7 +38,8 @@ public class AnalysisController {
                               TemplateCatalog templateCatalog,
                               TemplateResumeService templateResumeService,
                               ResumeComparisonService resumeComparisonService,
-                              ResumeQualityService resumeQualityService) {
+                              ResumeQualityService resumeQualityService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) HistoryService historyService) {
         this.analysisService = analysisService;
         this.atsKeywordService = atsKeywordService;
         this.formattingAnalysisService = formattingAnalysisService;
@@ -47,6 +49,20 @@ public class AnalysisController {
         this.templateResumeService = templateResumeService;
         this.resumeComparisonService = resumeComparisonService;
         this.resumeQualityService = resumeQualityService;
+        this.historyService = historyService;
+    }
+
+    public AnalysisController(AnalysisService analysisService,
+                              AtsKeywordService atsKeywordService,
+                              FormattingAnalysisService formattingAnalysisService,
+                              ResumeFixService resumeFixService,
+                              AnalysisSessionStore sessionStore,
+                              TemplateCatalog templateCatalog,
+                              TemplateResumeService templateResumeService,
+                              ResumeComparisonService resumeComparisonService,
+                              ResumeQualityService resumeQualityService) {
+        this(analysisService, atsKeywordService, formattingAnalysisService, resumeFixService, sessionStore,
+                templateCatalog, templateResumeService, resumeComparisonService, resumeQualityService, null);
     }
 
     public AnalysisController(AnalysisService analysisService,
@@ -59,7 +75,8 @@ public class AnalysisController {
         this(analysisService, atsKeywordService, formattingAnalysisService, resumeFixService, sessionStore,
                 templateCatalog, templateResumeService,
                 new ResumeComparisonService(atsKeywordService),
-                new ResumeQualityService(atsKeywordService, resumeFixService));
+                new ResumeQualityService(atsKeywordService, resumeFixService),
+                null);
     }
 
     public AnalysisController(AnalysisService analysisService,
@@ -68,12 +85,17 @@ public class AnalysisController {
                               ResumeFixService resumeFixService,
                               AnalysisSessionStore sessionStore) {
         this(analysisService, atsKeywordService, formattingAnalysisService, resumeFixService, sessionStore,
-                new TemplateCatalog(), new TemplateResumeService(new ResumeSectionParser()));
+                null, new TemplateResumeService(new ResumeSectionParser()),
+                new ResumeComparisonService(atsKeywordService),
+                new ResumeQualityService(atsKeywordService, resumeFixService),
+                null);
     }
 
     // Existing text-only endpoint - updated to store session in AnalysisSessionStore and support fix/download
     @PostMapping("/analyze")
-    public ResponseEntity<ApiResponse<AnalysisResponse>> analyze(@Valid @RequestBody AnalysisRequest request) {
+    public ResponseEntity<ApiResponse<AnalysisResponse>> analyze(
+            @Valid @RequestBody AnalysisRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
         AnalysisResponse response = analysisService.runAnalysis(request);
 
         String analysisId = UUID.randomUUID().toString();
@@ -102,6 +124,19 @@ public class AnalysisController {
         );
         sessionStore.put(analysisId, session);
 
+        if (historyService != null) {
+            historyService.recordAnalysis(
+                    analysisId,
+                    authHeader,
+                    request.getJobTitle(),
+                    response.getAtsScore(),
+                    response.getMatchedKeywords() != null ? response.getMatchedKeywords().size() : 0,
+                    response.getMissingKeywords() != null ? response.getMissingKeywords().size() : 0,
+                    response.getMissingKeywords(),
+                    "TEXT"
+            );
+        }
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -110,7 +145,8 @@ public class AnalysisController {
     public ResponseEntity<ApiResponse<AnalysisFileResponse>> analyzeFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("jobDescription") String jobDescription,
-            @RequestParam(value = "jobTitle", required = false, defaultValue = "Target Role") String jobTitle) throws IOException {
+            @RequestParam(value = "jobTitle", required = false, defaultValue = "Target Role") String jobTitle,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) throws IOException {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("File is empty"));
@@ -163,6 +199,19 @@ public class AnalysisController {
         response.setWeakSentenceCount(weak.getWeakSentenceCount());
         response.setTotalSentenceCount(weak.getTotalSentenceCount());
         response.setWeakSentenceExamples(weak.getWeakSentenceExamples());
+
+        if (historyService != null) {
+            historyService.recordAnalysis(
+                    analysisId,
+                    authHeader,
+                    jobTitle,
+                    atsResult.getAtsScore(),
+                    atsResult.getMatchedKeywords() != null ? atsResult.getMatchedKeywords().size() : 0,
+                    atsResult.getMissingKeywords() != null ? atsResult.getMissingKeywords().size() : 0,
+                    atsResult.getMissingKeywords(),
+                    "FILE"
+            );
+        }
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -218,6 +267,10 @@ public class AnalysisController {
             fixes.add("Applied the '" + selectedTemplate.getName() + "' template");
             resTemplateId = selectedTemplate.getId();
             resTemplateName = selectedTemplate.getName();
+        }
+
+        if (historyService != null) {
+            historyService.recordTemplateUsed(analysisId, resTemplateId);
         }
 
         FixResumeResponse response = new FixResumeResponse(

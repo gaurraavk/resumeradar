@@ -125,6 +125,78 @@ export interface ResumeQualityResult {
   longParagraphWarnings: string[];
   missingSections: string[];
   improvementAreas: string[];
+}export interface UserSummary {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
 }
 
+export interface UserProfile {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface AuthResponseData {
+  token: string;
+  user: UserSummary;
+}
+
+export interface HistoryRecord {
+  id: number;
+  analysisId: string;
+  jobTitle?: string | null;
+  atsScore: number;
+  matchedCount: number;
+  missingCount: number;
+  topMissingKeywords?: string | null;
+  inputType: 'TEXT' | 'FILE' | string;
+  templateUsed?: string | null;
+  createdAt: string;
+}
+
+export interface DailyAnalysisCount {
+  date: string;
+  count: number;
+}
+
+export interface TemplateUsageStat {
+  templateId: string;
+  name: string;
+  count: number;
+}
+
+export interface KeywordCountStat {
+  keyword: string;
+  count: number;
+}
+
+export interface InputTypeSplit {
+  text: number;
+  file: number;
+}
+
+export interface RecentAnalysisItem {
+  date: string;
+  jobTitle: string;
+  score: number;
+  userName: string;
+}
+
+export interface AdminAnalyticsData {
+  totalUsers: number;
+  newUsersLast7Days: number;
+  totalAnalyses: number;
+  analysesLast7Days: DailyAnalysisCount[];
+  averageAtsScore: number;
+  scoreBuckets: Record<string, number>;
+  templateUsage: TemplateUsageStat[];
+  topMissingKeywords: KeywordCountStat[];
+  inputTypeSplit: InputTypeSplit;
+  recentAnalyses: RecentAnalysisItem[];
+}
 

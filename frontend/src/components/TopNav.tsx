@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { UserSummary } from '../types';
 
 interface TopNavProps {
   currentTab: string;
   onNavigate: (tab: string) => void;
   isAdminLoggedIn?: boolean;
   onAdminLogout?: () => void;
+  currentUser?: UserSummary | null;
+  onUserLogout?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -12,6 +15,8 @@ export const TopNav: React.FC<TopNavProps> = ({
   onNavigate,
   isAdminLoggedIn = false,
   onAdminLogout,
+  currentUser = null,
+  onUserLogout,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -30,7 +35,7 @@ export const TopNav: React.FC<TopNavProps> = ({
         isScrolled ? 'macos-glass-scrolled' : 'macos-glass'
       }`}
     >
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-6 md:gap-8">
         <button
           onClick={() => onNavigate('landing')}
           className="flex items-center gap-2.5 font-semibold text-base text-[#1d1d1f] tracking-tight hover:opacity-80 transition-opacity duration-300 cursor-pointer active:scale-[0.98]"
@@ -41,7 +46,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <span className="font-semibold tracking-tight">ResumeRadar</span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
+        <div className="hidden md:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
           <button
             onClick={() => onNavigate('landing')}
             className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
@@ -95,45 +100,83 @@ export const TopNav: React.FC<TopNavProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2 sm:gap-2.5">
         <button
           onClick={() => onNavigate('new-analysis')}
-          className="inline-flex items-center gap-1.5 bg-[#1d1d1f] text-white text-[13px] font-medium px-4 py-1.5 rounded-2xl hover:bg-neutral-800 transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-sm"
+          className="hidden sm:inline-flex items-center gap-1.5 bg-[#1d1d1f] text-white text-[13px] font-medium px-3.5 py-1.5 rounded-2xl hover:bg-neutral-800 transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-sm"
         >
           <span className="material-symbols-outlined text-[15px]">add</span>
           <span>New Scan</span>
         </button>
 
+        {/* User Auth Section */}
+        {currentUser ? (
+          <div className="flex items-center gap-1.5 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
+            <span className="text-[13px] font-medium text-[#1d1d1f] px-2.5 py-1 hidden lg:inline">
+              {currentUser.fullName}
+            </span>
+            <button
+              onClick={() => onNavigate('history')}
+              className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] flex items-center gap-1 ${
+                currentTab === 'history'
+                  ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
+                  : 'text-neutral-600 hover:text-[#1d1d1f]'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[15px]">history</span>
+              <span>My History</span>
+            </button>
+            <button
+              onClick={onUserLogout}
+              className="text-[13px] font-medium text-rose-600 hover:text-rose-700 px-2 py-1 transition-colors duration-300 cursor-pointer active:scale-[0.98]"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => onNavigate('auth')}
+            className={`text-[13px] font-medium px-3.5 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'auth'
+                ? 'bg-[#1d1d1f] text-white shadow-sm'
+                : 'text-[#1d1d1f] bg-black/[0.04] hover:bg-black/[0.08]'
+            }`}
+          >
+            Sign in
+          </button>
+        )}
+
+        {/* Admin Login Section */}
         {isAdminLoggedIn ? (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 border-l border-black/[0.08] pl-2">
             <button
               onClick={() => onNavigate('admin-dashboard')}
-              className={`text-[13px] font-medium px-3.5 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              className={`text-[13px] font-medium px-3 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
                 currentTab === 'admin-dashboard'
                   ? 'bg-[#1d1d1f] text-white shadow-sm'
                   : 'text-neutral-600 hover:bg-black/[0.04]'
               }`}
             >
-              Dashboard
+              Admin
             </button>
             <button
               onClick={onAdminLogout}
               className="text-[13px] font-medium text-rose-600 hover:text-rose-700 px-2 py-1 transition-colors duration-300 cursor-pointer active:scale-[0.98]"
             >
-              Sign Out
+              Exit
             </button>
           </div>
         ) : (
           <button
             onClick={() => onNavigate('admin-login')}
-            className={`flex items-center gap-1 text-[13px] font-medium px-3 py-1.5 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            className={`flex items-center gap-1 text-[13px] font-medium px-2.5 py-1.5 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
               currentTab === 'admin-login'
                 ? 'bg-[#1d1d1f] text-white shadow-sm'
-                : 'text-neutral-500 hover:text-[#1d1d1f] hover:bg-black/[0.04]'
+                : 'text-neutral-400 hover:text-[#1d1d1f]'
             }`}
+            title="Admin Login"
           >
-            <span className="material-symbols-outlined text-[14px]">shield_person</span>
-            <span>Admin</span>
+            <span className="material-symbols-outlined text-[15px]">shield_person</span>
           </button>
         )}
       </div>

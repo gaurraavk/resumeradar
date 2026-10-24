@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TopNav } from './components/TopNav';
 import { LandingView } from './components/LandingView';
 import { NewAnalysisView } from './components/NewAnalysisView';
@@ -8,15 +8,18 @@ import { AdminDashboardView } from './components/AdminDashboardView';
 import { BestFitView } from './components/BestFitView';
 import { CompareView } from './components/CompareView';
 import { QualityAnalyzerView } from './components/QualityAnalyzerView';
+import { AuthView } from './components/AuthView';
+import { HistoryView } from './components/HistoryView';
 import { Footer } from './components/Footer';
 
 import {
   ResumeData,
   AnalysisResult,
   AnalysisFileResult,
+  UserSummary,
 } from './types';
 
-import { apiFetch, apiUpload } from './lib/apiClient';
+import { apiFetch, apiUpload, getUserToken, clearUserToken } from './lib/apiClient';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<string>('landing');
@@ -24,6 +27,43 @@ export function App() {
   const [currentResume, setCurrentResume] = useState<ResumeData | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | AnalysisFileResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  // User auth state
+  const [currentUser, setCurrentUser] = useState<UserSummary | null>(null);
+
+  useEffect(() => {
+    const token = getUserToken();
+    if (token) {
+      apiFetch('/api/v1/auth/me')
+        .then(async (res) => {
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+              setCurrentUser({
+                id: json.data.id,
+                fullName: json.data.fullName,
+                email: json.data.email,
+                role: json.data.role,
+              });
+            }
+          } else {
+            clearUserToken();
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  const handleAuthSuccess = (user: UserSummary) => {
+    setCurrentUser(user);
+    setCurrentTab('new-analysis');
+  };
+
+  const handleUserLogout = () => {
+    clearUserToken();
+    setCurrentUser(null);
+    setCurrentTab('landing');
+  };
 
   // Admin state
   const [adminUser, setAdminUser] = useState<{ email: string; name: string; role: string } | null>(() => {
@@ -142,6 +182,8 @@ export function App() {
         onNavigate={handleNavigate}
         isAdminLoggedIn={!!adminUser}
         onAdminLogout={handleAdminLogout}
+        currentUser={currentUser}
+        onUserLogout={handleUserLogout}
       />
 
       <main className="flex-1 flex flex-col">
@@ -173,6 +215,23 @@ export function App() {
             result={analysisResult}
             resume={currentResume}
             onNewScan={() => handleNavigate('new-analysis')}
+            isLoggedIn={!!currentUser}
+            onNavigateToAuth={() => handleNavigate('auth')}
+          />
+        )}
+
+        {currentTab === 'auth' && (
+          <AuthView
+            onAuthSuccess={handleAuthSuccess}
+            onNavigateHome={() => handleNavigate('landing')}
+          />
+        )}
+
+        {currentTab === 'history' && (
+          <HistoryView
+            onNavigateToScanner={() => handleNavigate('new-analysis')}
+            onNavigateToAuth={() => handleNavigate('auth')}
+            userEmail={currentUser?.email}
           />
         )}
 

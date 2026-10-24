@@ -1,17 +1,39 @@
 package com.resumeradar.model;
 
+import jakarta.persistence.*;
 import java.util.List;
 
+@Entity
+@Table(name = "resume_templates")
 public class ResumeTemplate {
 
+    @Id
+    @Column(name = "id", length = 64, nullable = false)
     private String id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description", length = 500)
     private String description;
+
+    @Column(name = "font_family", nullable = false)
     private String fontFamily;
+
+    @Column(name = "accent_color_hex", nullable = false)
     private String accentColorHex;
+
+    @Column(name = "name_alignment", nullable = false)
     private String nameAlignment; // "LEFT" or "CENTER"
+
+    @Column(name = "heading_case", nullable = false)
     private String headingCase;   // "UPPER" or "TITLE"
+
+    @Column(name = "show_divider_line", nullable = false)
     private boolean showDividerLine;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "section_order", length = 500, nullable = false)
     private List<String> sectionOrder;
 
     public ResumeTemplate() {}

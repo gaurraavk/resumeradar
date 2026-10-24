@@ -2,15 +2,10 @@ package com.resumeradar.service;
 
 import com.resumeradar.dto.AdminLoginRequest;
 import com.resumeradar.dto.AdminLoginResponse;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.resumeradar.security.JwtTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 @Service
 public class AdminService {
@@ -27,12 +22,36 @@ public class AdminService {
     @Value("${resumeradar.admin.jwt-expiration-ms:86400000}")
     private long jwtExpirationMs;
 
+    private JwtTokenService jwtTokenService;
+
+    public AdminService() {
+        this.jwtTokenService = new JwtTokenService();
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AdminService(JwtTokenService jwtTokenService) {
+        this.jwtTokenService = jwtTokenService;
+    }
+
+    private void ensureJwtConfig() {
+        if (jwtTokenService == null) {
+            jwtTokenService = new JwtTokenService();
+        }
+        if (jwtSecret != null) {
+            jwtTokenService.setJwtSecret(jwtSecret);
+        }
+        if (jwtExpirationMs > 0) {
+            jwtTokenService.setJwtExpirationMs(jwtExpirationMs);
+        }
+    }
+
     public AdminLoginResponse login(AdminLoginRequest request) {
+        ensureJwtConfig();
         if (!adminEmail.equalsIgnoreCase(request.getEmail().trim()) || !adminPassword.equals(request.getPassword())) {
             throw new BadCredentialsException("Invalid admin credentials");
         }
 
-        String token = generateToken(request.getEmail());
+        String token = jwtTokenService.generateToken(request.getEmail(), "ADMIN");
         AdminLoginResponse.AdminUserDto user = new AdminLoginResponse.AdminUserDto(
                 adminEmail,
                 "Chief Administrator",
@@ -43,36 +62,12 @@ public class AdminService {
     }
 
     public boolean validateToken(String token) {
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        ensureJwtConfig();
+        return jwtTokenService.validateToken(token);
     }
 
     public String getEmailFromToken(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-    }
-
-    private String generateToken(String email) {
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpirationMs);
-
-        return Jwts.builder()
-                .subject(email)
-                .claim("role", "ADMIN")
-                .issuedAt(now)
-                .expiration(expiry)
-                .signWith(key)
-                .compact();
+        ensureJwtConfig();
+        return jwtTokenService.getEmailFromToken(token);
     }
 }

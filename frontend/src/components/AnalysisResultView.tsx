@@ -65,12 +65,16 @@ interface AnalysisResultViewProps {
   result: AnalysisResult | AnalysisFileResult;
   resume: ResumeData;
   onNewScan: () => void;
+  isLoggedIn?: boolean;
+  onNavigateToAuth?: () => void;
 }
 
 export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
   result,
   resume,
   onNewScan,
+  isLoggedIn = false,
+  onNavigateToAuth,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'keywords' | 'autofix'>('overview');
   const [isFixing, setIsFixing] = useState(false);
@@ -311,6 +315,24 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
           <span>New Analysis</span>
         </button>
       </div>
+
+      {/* Guest Hint Banner */}
+      {!isLoggedIn && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-indigo-50/80 border border-indigo-200/60 text-indigo-950 text-[13px] animate-entrance">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-indigo-600">info</span>
+            <span>Sign in to save this analysis to your history</span>
+          </div>
+          {onNavigateToAuth && (
+            <button
+              onClick={onNavigateToAuth}
+              className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-medium transition-colors cursor-pointer shrink-0"
+            >
+              Sign in
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Prominent Score Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
