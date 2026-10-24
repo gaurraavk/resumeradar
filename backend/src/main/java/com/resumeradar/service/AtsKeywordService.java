@@ -29,7 +29,9 @@ public class AtsKeywordService {
             "you've", "your", "yours", "yourself", "yourselves", "will", "shall", "must", "may", "might", "etc",
             "role", "responsibilities", "requirements", "qualifications", "experience", "looking", "candidate",
             "candidates", "years", "year", "team", "work", "working", "opportunity", "company", "position",
-            "seeking", "experienced", "skills", "ability", "knowledge"
+            "seeking", "experienced", "skills", "ability", "knowledge",
+            "required", "mandatory", "preferred", "nice", "plus", "bonus", "needed", "expertise",
+            "proficient", "proficiency", "strong", "familiarity"
     );
 
     // Common multi-word technical and professional phrases to recognize
@@ -153,30 +155,39 @@ public class AtsKeywordService {
         return pattern.matcher(normalizedText).find();
     }
 
-    private static final Map<String, String> COMMON_SECTIONS = new LinkedHashMap<>();
+    private static final Map<String, List<String>> COMMON_SECTIONS = new LinkedHashMap<>();
     static {
-        COMMON_SECTIONS.put("education", "Education");
-        COMMON_SECTIONS.put("experience", "Experience");
-        COMMON_SECTIONS.put("skills", "Skills");
-        COMMON_SECTIONS.put("projects", "Projects");
-        COMMON_SECTIONS.put("certifications", "Certifications");
+        COMMON_SECTIONS.put("Education", List.of("education", "academic background", "qualification"));
+        COMMON_SECTIONS.put("Experience", List.of("experience", "work history", "employment", "internship", "professional background"));
+        COMMON_SECTIONS.put("Skills", List.of("skills", "technical skills", "core competencies"));
+        COMMON_SECTIONS.put("Projects", List.of("projects", "academic projects", "personal projects"));
+        COMMON_SECTIONS.put("Certifications", List.of("certifications", "certification", "achievements", "courses", "licenses"));
     }
 
     /**
      * Feature 3: Check if the resume contains common section headings (case-insensitive).
+     * Accepts alternate heading aliases per ATS best practices.
      * Returns list of missing section names (e.g. ["Projects", "Certifications"]).
      */
     public List<String> detectMissingSections(String resumeText) {
         if (resumeText == null || resumeText.isBlank()) {
-            return new ArrayList<>(COMMON_SECTIONS.values());
+            return new ArrayList<>(COMMON_SECTIONS.keySet());
         }
 
         List<String> missing = new ArrayList<>();
-        for (Map.Entry<String, String> entry : COMMON_SECTIONS.entrySet()) {
-            String keyword = entry.getKey();
-            Pattern pattern = Pattern.compile("(?i)\\b" + Pattern.quote(keyword) + "s?\\b");
-            if (!pattern.matcher(resumeText).find()) {
-                missing.add(entry.getValue());
+        for (Map.Entry<String, List<String>> entry : COMMON_SECTIONS.entrySet()) {
+            String sectionName = entry.getKey();
+            List<String> aliases = entry.getValue();
+            boolean found = false;
+            for (String alias : aliases) {
+                Pattern pattern = Pattern.compile("(?i)\\b" + Pattern.quote(alias) + "s?\\b");
+                if (pattern.matcher(resumeText).find()) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                missing.add(sectionName);
             }
         }
         return missing;

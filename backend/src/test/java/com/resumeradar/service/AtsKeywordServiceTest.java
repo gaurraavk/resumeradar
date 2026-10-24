@@ -91,6 +91,30 @@ class AtsKeywordServiceTest {
     }
 
     @Test
+    void testDetectMissingSectionsWithAliases() {
+        String resume = "ACADEMIC BACKGROUND\nBS Computer Science\n\n" +
+                "WORK HISTORY\nSoftware Developer at Corp\n\n" +
+                "CORE COMPETENCIES\nJava, Spring Boot, Docker\n\n" +
+                "PERSONAL PROJECTS\nOpen Source CLI Tool\n\n" +
+                "COURSES & LICENSES\nAWS Certified Solutions Architect";
+        List<String> missing = service.detectMissingSections(resume);
+        assertTrue(missing.isEmpty(), "Should recognize all section aliases: " + missing);
+    }
+
+    @Test
+    void testStopWordsExcludeNewNoiseWords() {
+        String jd = "Looking for a required mandatory preferred nice plus bonus needed expertise proficient proficiency strong familiarity Java developer.";
+        AtsResult result = service.analyzeKeywords("Java developer", jd);
+        // Only "java" and "developer" should be extracted keywords, none of the 12 noise words
+        assertFalse(result.getMissingKeywords().contains("required"));
+        assertFalse(result.getMissingKeywords().contains("mandatory"));
+        assertFalse(result.getMissingKeywords().contains("preferred"));
+        assertFalse(result.getMissingKeywords().contains("expertise"));
+        assertFalse(result.getMissingKeywords().contains("strong"));
+        assertTrue(result.getMatchedKeywords().contains("java"));
+    }
+
+    @Test
     void testAnalyzeWeakSentences() {
         ResumeFixService fixService = new ResumeFixService(new AnalysisSessionStore());
         fixService.init();

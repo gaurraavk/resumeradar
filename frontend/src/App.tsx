@@ -6,10 +6,8 @@ import { AnalysisResultView } from './components/AnalysisResultView';
 import { AdminLoginView } from './components/AdminLoginView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { BestFitView } from './components/BestFitView';
-import { JobAnalyzerView } from './components/JobAnalyzerView';
 import { CompareView } from './components/CompareView';
 import { QualityAnalyzerView } from './components/QualityAnalyzerView';
-import { DashboardView } from './components/DashboardView';
 import { Footer } from './components/Footer';
 
 import {
@@ -24,7 +22,6 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>('landing');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [currentResume, setCurrentResume] = useState<ResumeData | null>(null);
-  const [lastJobDescription, setLastJobDescription] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | AnalysisFileResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
@@ -56,7 +53,6 @@ export function App() {
     setIsAnalyzing(true);
     setAnalysisError(null);
     setCurrentResume(resume);
-    setLastJobDescription(jobDescription);
 
     try {
       const resumeText = resume.rawText || [
@@ -97,7 +93,6 @@ export function App() {
   const handleRunFileAnalysis = async (file: File, jobDescription: string, jobTitle: string) => {
     setIsAnalyzing(true);
     setAnalysisError(null);
-    setLastJobDescription(jobDescription);
     setCurrentResume({
       id: 'file-' + Date.now(),
       name: file.name.replace(/\.[^/.]+$/, ''),
@@ -178,12 +173,7 @@ export function App() {
             result={analysisResult}
             resume={currentResume}
             onNewScan={() => handleNavigate('new-analysis')}
-            onViewDashboard={() => handleNavigate('dashboard')}
           />
-        )}
-
-        {currentTab === 'job-analyzer' && (
-          <JobAnalyzerView />
         )}
 
         {currentTab === 'compare-versions' && (
@@ -192,13 +182,6 @@ export function App() {
 
         {currentTab === 'quality-analyzer' && (
           <QualityAnalyzerView />
-        )}
-
-        {currentTab === 'dashboard' && (
-          <DashboardView
-            initialResumeText={currentResume?.rawText || ''}
-            initialJobDescription={lastJobDescription}
-          />
         )}
 
         {currentTab === 'best-fit' && (

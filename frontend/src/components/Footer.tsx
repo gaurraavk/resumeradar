@@ -17,27 +17,21 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <span className="font-normal text-neutral-400">Deterministic ATS Matcher & Auto-Fix Engine</span>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-5 font-medium">
+        <div className="flex flex-wrap items-center justify-center gap-6 font-medium">
           <button onClick={() => onNavigate('landing')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
             Home
           </button>
           <button onClick={() => onNavigate('new-analysis')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
             ATS Scan
           </button>
-          <button onClick={() => onNavigate('job-analyzer')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
-            Job Analyzer
+          <button onClick={() => onNavigate('best-fit')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
+            Best Fit
           </button>
           <button onClick={() => onNavigate('compare-versions')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
             Compare
           </button>
           <button onClick={() => onNavigate('quality-analyzer')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
             Quality
-          </button>
-          <button onClick={() => onNavigate('dashboard')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
-            Dashboard
-          </button>
-          <button onClick={() => onNavigate('best-fit')} className="hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer active:scale-[0.98]">
-            Best Fit
           </button>
           <button
             onClick={() => onNavigate('admin-login')}

@@ -285,24 +285,6 @@ class AnalysisControllerIntegrationTest {
     }
 
     @Test
-    void testAnalyzeJob_ExtractsKeywordsAndRequirements() throws Exception {
-        String jd = "Senior Java Engineer. Requirements: Must have 5+ years of experience with Java, Spring Boot, and REST APIs. " +
-                "Preferred qualifications: nice to have Docker, Kubernetes, and AWS experience. " +
-                "Education: Bachelor's degree in Computer Science or related field.";
-
-        mockMvc.perform(post("/api/v1/analyze-job")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("jobDescription", jd))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.topKeywords", hasItems("java", "spring boot", "docker", "kubernetes", "aws")))
-                .andExpect(jsonPath("$.data.requiredSkills", hasItems("java", "spring boot")))
-                .andExpect(jsonPath("$.data.preferredSkills", hasItems("docker", "kubernetes", "aws")))
-                .andExpect(jsonPath("$.data.experienceRequired", containsString("5+ years")))
-                .andExpect(jsonPath("$.data.educationRequired", containsString("Bachelor's degree")));
-    }
-
-    @Test
     void testCompareVersions_ScoresAndIdentifiesWinner() throws Exception {
         String resumeA = "Software developer skilled in Java and SQL.";
         String resumeB = "Senior software engineer skilled in Java, Spring Boot, Docker, and Kubernetes.";
@@ -350,23 +332,18 @@ class AnalysisControllerIntegrationTest {
     }
 
     @Test
-    void testUnifiedAnalysis_CombinesAtsQualityAndJobRequirements() throws Exception {
-        String resume = "Jane Doe\njane@example.com\n\nEXPERIENCE\n- Designed and implemented Java microservices.\n\nSKILLS\nJava, Spring Boot, Docker";
-        String jd = "Looking for a Java and Spring Boot engineer with 3+ years experience. Bachelor's degree required. Nice to have AWS.";
+    void testAnalyzeQuality_WithWorkHistoryHeading_RecognizesExperienceAndChecksWording() throws Exception {
+        String resume = "Jane Doe\njane@example.com\n\nWORK HISTORY\n- Developed microservices in Java.\n\nTECHNICAL SKILLS\nJava, SQL";
 
-        mockMvc.perform(post("/api/v1/unified-analysis")
+        mockMvc.perform(post("/api/v1/analyze-quality")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "resumeText", resume,
-                                "jobDescription", jd
-                        ))))
+                        .content(objectMapper.writeValueAsString(Map.of("resumeText", resume))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.atsMatch.atsScore").isNumber())
-                .andExpect(jsonPath("$.data.atsMatch.matchedKeywords", hasItems("java", "spring boot")))
-                .andExpect(jsonPath("$.data.resumeQuality.qualityScore").isNumber())
-                .andExpect(jsonPath("$.data.jobRequirements.requiredSkills").isArray())
-                .andExpect(jsonPath("$.data.overallSummary", not(emptyString())));
+                .andExpect(jsonPath("$.data.missingSections", not(hasItem("Experience"))))
+                .andExpect(jsonPath("$.data.missingSections", not(hasItem("Skills"))))
+                .andExpect(jsonPath("$.data.missingSections", hasItem("Education")))
+                .andExpect(jsonPath("$.data.improvementAreas", hasItem("Add the 'Education' section to meet standard ATS formatting")));
     }
 }
 

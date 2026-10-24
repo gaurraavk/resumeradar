@@ -167,7 +167,7 @@ public class ResumeQualityService {
             improvementAreas.add("Add measurable results and metrics (e.g. %, revenue, performance gains, team size)");
         }
         for (String section : missingSections) {
-            improvementAreas.add("Add a " + section + " section to meet standard ATS formatting");
+            improvementAreas.add("Add the '" + section + "' section to meet standard ATS formatting");
         }
         if (!longParagraphWarnings.isEmpty()) {
             improvementAreas.add("Break dense paragraphs into readable bullet points");
