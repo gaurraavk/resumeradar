@@ -41,10 +41,10 @@ export const TopNav: React.FC<TopNavProps> = ({
           <span className="font-semibold tracking-tight">ResumeRadar</span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
+        <div className="hidden lg:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
           <button
             onClick={() => onNavigate('landing')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
               currentTab === 'landing'
                 ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
                 : 'text-neutral-500 hover:text-[#1d1d1f]'
@@ -54,7 +54,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           </button>
           <button
             onClick={() => onNavigate('new-analysis')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
               currentTab === 'new-analysis' || currentTab === 'analysis-result'
                 ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
                 : 'text-neutral-500 hover:text-[#1d1d1f]'
@@ -63,8 +63,48 @@ export const TopNav: React.FC<TopNavProps> = ({
             ATS Scan
           </button>
           <button
+            onClick={() => onNavigate('job-analyzer')}
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'job-analyzer'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            }`}
+          >
+            Job Analyzer
+          </button>
+          <button
+            onClick={() => onNavigate('compare-versions')}
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'compare-versions'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            }`}
+          >
+            Compare
+          </button>
+          <button
+            onClick={() => onNavigate('quality-analyzer')}
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'quality-analyzer'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            }`}
+          >
+            Quality
+          </button>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+              currentTab === 'dashboard'
+                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
+                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
             onClick={() => onNavigate('best-fit')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
               currentTab === 'best-fit'
                 ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
                 : 'text-neutral-500 hover:text-[#1d1d1f]'

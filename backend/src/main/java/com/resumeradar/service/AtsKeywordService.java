@@ -82,7 +82,16 @@ public class AtsKeywordService {
         return new AtsResult(score, matched, missing);
     }
 
-    private String normalizeText(String text) {
+    public Set<String> extractKeywords(String jobDescription) {
+        if (jobDescription == null || jobDescription.isBlank()) {
+            return Collections.emptySet();
+        }
+        String normalizedJob = normalizeText(jobDescription);
+        return extractSignificantKeywords(jobDescription, normalizedJob);
+    }
+
+    public String normalizeText(String text) {
+        if (text == null) return "";
         return text.toLowerCase()
                 .replaceAll("[^a-z0-9#+./\\-\\s]", " ")
                 .replaceAll("\\s+", " ")

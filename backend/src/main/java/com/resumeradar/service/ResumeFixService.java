@@ -105,6 +105,14 @@ public class ResumeFixService {
         }
     }
 
+    public Map<String, String> getActionVerbMap() {
+        return Collections.unmodifiableMap(actionVerbMap);
+    }
+
+    public Set<String> getStrongVerbs() {
+        return new LinkedHashSet<>(actionVerbMap.values());
+    }
+
     /**
      * Generate a fixed .docx resume and return before/after ATS scores + fixes applied.
      */

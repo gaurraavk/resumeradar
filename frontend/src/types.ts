@@ -99,3 +99,46 @@ export interface BestFitResult {
   matchScore: number;
   missingKeywords: string[];
 }
+
+export interface JobAnalysisResult {
+  topKeywords: string[];
+  requiredSkills: string[];
+  preferredSkills: string[];
+  experienceRequired?: string | null;
+  educationRequired?: string | null;
+}
+
+export interface AtsScoreResult {
+  atsScore: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+}
+
+export interface CompareVersionsResult {
+  resultA: AtsScoreResult;
+  resultB: AtsScoreResult;
+  newlyAddedKeywords: string[];
+  stillMissingKeywords: string[];
+  winner: 'A' | 'B' | 'tie';
+}
+
+export interface ResumeQualityResult {
+  qualityScore: number;
+  hasContactInfo: boolean;
+  wordCount: number;
+  estimatedLength: 'One page' | 'Too long' | 'Too short' | string;
+  bulletPointCount: number;
+  actionVerbUsageCount: number;
+  measurableAchievementCount: number;
+  longParagraphWarnings: string[];
+  missingSections: string[];
+  improvementAreas: string[];
+}
+
+export interface UnifiedAnalysisResult {
+  atsMatch: AtsScoreResult;
+  resumeQuality: ResumeQualityResult;
+  jobRequirements: JobAnalysisResult;
+  overallSummary: string;
+}
+

@@ -65,12 +65,14 @@ interface AnalysisResultViewProps {
   result: AnalysisResult | AnalysisFileResult;
   resume: ResumeData;
   onNewScan: () => void;
+  onViewDashboard?: () => void;
 }
 
 export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
   result,
   resume,
   onNewScan,
+  onViewDashboard,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'keywords' | 'autofix'>('overview');
   const [isFixing, setIsFixing] = useState(false);
@@ -303,13 +305,24 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onNewScan}
-          className="flex items-center gap-2 bg-[#1d1d1f] text-white px-5 py-2.5 rounded-2xl text-[13px] font-medium hover:bg-neutral-800 transition-all duration-300 cursor-pointer active:scale-[0.98] shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[16px]">refresh</span>
-          <span>New Analysis</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          {onViewDashboard && (
+            <button
+              onClick={onViewDashboard}
+              className="flex items-center gap-1.5 bg-white text-[#1d1d1f] border border-black/[0.1] px-4 py-2.5 rounded-2xl text-[13px] font-medium hover:bg-neutral-50 transition-all duration-300 cursor-pointer active:scale-[0.98] shadow-2xs"
+            >
+              <span className="material-symbols-outlined text-[16px] text-indigo-600">dashboard</span>
+              <span>View Full Dashboard</span>
+            </button>
+          )}
+          <button
+            onClick={onNewScan}
+            className="flex items-center gap-2 bg-[#1d1d1f] text-white px-5 py-2.5 rounded-2xl text-[13px] font-medium hover:bg-neutral-800 transition-all duration-300 cursor-pointer active:scale-[0.98] shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[16px]">refresh</span>
+            <span>New Analysis</span>
+          </button>
+        </div>
       </div>
 
       {/* Prominent Score Cards */}

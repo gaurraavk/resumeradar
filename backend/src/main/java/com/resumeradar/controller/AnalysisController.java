@@ -25,6 +25,10 @@ public class AnalysisController {
     private final AnalysisSessionStore sessionStore;
     private final TemplateCatalog templateCatalog;
     private final TemplateResumeService templateResumeService;
+    private final JobAnalyzerService jobAnalyzerService;
+    private final ResumeComparisonService resumeComparisonService;
+    private final ResumeQualityService resumeQualityService;
+    private final UnifiedAnalysisService unifiedAnalysisService;
 
     @org.springframework.beans.factory.annotation.Autowired
     public AnalysisController(AnalysisService analysisService,
@@ -33,7 +37,11 @@ public class AnalysisController {
                               ResumeFixService resumeFixService,
                               AnalysisSessionStore sessionStore,
                               TemplateCatalog templateCatalog,
-                              TemplateResumeService templateResumeService) {
+                              TemplateResumeService templateResumeService,
+                              JobAnalyzerService jobAnalyzerService,
+                              ResumeComparisonService resumeComparisonService,
+                              ResumeQualityService resumeQualityService,
+                              UnifiedAnalysisService unifiedAnalysisService) {
         this.analysisService = analysisService;
         this.atsKeywordService = atsKeywordService;
         this.formattingAnalysisService = formattingAnalysisService;
@@ -41,6 +49,25 @@ public class AnalysisController {
         this.sessionStore = sessionStore;
         this.templateCatalog = templateCatalog;
         this.templateResumeService = templateResumeService;
+        this.jobAnalyzerService = jobAnalyzerService;
+        this.resumeComparisonService = resumeComparisonService;
+        this.resumeQualityService = resumeQualityService;
+        this.unifiedAnalysisService = unifiedAnalysisService;
+    }
+
+    public AnalysisController(AnalysisService analysisService,
+                              AtsKeywordService atsKeywordService,
+                              FormattingAnalysisService formattingAnalysisService,
+                              ResumeFixService resumeFixService,
+                              AnalysisSessionStore sessionStore,
+                              TemplateCatalog templateCatalog,
+                              TemplateResumeService templateResumeService) {
+        this(analysisService, atsKeywordService, formattingAnalysisService, resumeFixService, sessionStore,
+                templateCatalog, templateResumeService,
+                new JobAnalyzerService(atsKeywordService),
+                new ResumeComparisonService(atsKeywordService),
+                new ResumeQualityService(atsKeywordService, resumeFixService),
+                new UnifiedAnalysisService(atsKeywordService, new ResumeQualityService(atsKeywordService, resumeFixService), new JobAnalyzerService(atsKeywordService)));
     }
 
     public AnalysisController(AnalysisService analysisService,
@@ -266,4 +293,40 @@ public class AnalysisController {
 
         return ResponseEntity.ok(ApiResponse.success(new BestFitResponse(results)));
     }
+
+    // Module 1: Job Description Analyzer
+    @PostMapping("/analyze-job")
+    public ResponseEntity<ApiResponse<JobAnalysisResponse>> analyzeJob(@RequestBody(required = false) JobAnalysisRequest request) {
+        String jd = (request != null && request.getJobDescription() != null) ? request.getJobDescription() : "";
+        JobAnalysisResponse response = jobAnalyzerService.analyzeJob(jd);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // Module 2: Resume Version Comparison
+    @PostMapping("/compare-versions")
+    public ResponseEntity<ApiResponse<CompareVersionsResponse>> compareVersions(@RequestBody(required = false) CompareVersionsRequest request) {
+        String resumeA = (request != null && request.getResumeTextA() != null) ? request.getResumeTextA() : "";
+        String resumeB = (request != null && request.getResumeTextB() != null) ? request.getResumeTextB() : "";
+        String jd = (request != null && request.getJobDescription() != null) ? request.getJobDescription() : "";
+        CompareVersionsResponse response = resumeComparisonService.compareVersions(resumeA, resumeB, jd);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // Module 3: Resume Quality Analyzer
+    @PostMapping("/analyze-quality")
+    public ResponseEntity<ApiResponse<ResumeQualityResponse>> analyzeQuality(@RequestBody(required = false) ResumeQualityRequest request) {
+        String resume = (request != null && request.getResumeText() != null) ? request.getResumeText() : "";
+        ResumeQualityResponse response = resumeQualityService.analyzeQuality(resume);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // Module 4: Unified Analysis Dashboard
+    @PostMapping("/unified-analysis")
+    public ResponseEntity<ApiResponse<UnifiedAnalysisResponse>> unifiedAnalysis(@RequestBody(required = false) UnifiedAnalysisRequest request) {
+        String resume = (request != null && request.getResumeText() != null) ? request.getResumeText() : "";
+        String jd = (request != null && request.getJobDescription() != null) ? request.getJobDescription() : "";
+        UnifiedAnalysisResponse response = unifiedAnalysisService.runUnifiedAnalysis(resume, jd);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }
+
