@@ -39,11 +39,17 @@ public class ResumeFixService {
         private final int originalScore;
         private final int improvedScore;
         private final List<String> fixesApplied;
+        private final String fixedText;
 
         public FixResult(int originalScore, int improvedScore, List<String> fixesApplied) {
+            this(originalScore, improvedScore, fixesApplied, null);
+        }
+
+        public FixResult(int originalScore, int improvedScore, List<String> fixesApplied, String fixedText) {
             this.originalScore = originalScore;
             this.improvedScore = improvedScore;
             this.fixesApplied = fixesApplied;
+            this.fixedText = fixedText;
         }
 
         public int getOriginalScore() {
@@ -56,6 +62,10 @@ public class ResumeFixService {
 
         public List<String> getFixesApplied() {
             return fixesApplied;
+        }
+
+        public String getFixedText() {
+            return fixedText;
         }
     }
 
@@ -191,7 +201,7 @@ public class ResumeFixService {
                     improvedScore = Math.min(100, originalScore + 25);
                 }
 
-                return new FixResult(originalScore, improvedScore, fixesApplied);
+                return new FixResult(originalScore, improvedScore, fixesApplied, fixedText);
             }
         } catch (IOException e) {
             logger.error("Error generating fixed resume: {}", e.getMessage(), e);

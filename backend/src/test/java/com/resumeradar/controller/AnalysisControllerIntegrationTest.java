@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -185,9 +186,102 @@ class AnalysisControllerIntegrationTest {
     }
 
     @Test
+    void testTemplatesEndpoint_ReturnsCatalog() throws Exception {
+        mockMvc.perform(get("/api/v1/templates"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data", hasSize(4)))
+                .andExpect(jsonPath("$.data[0].id").value("classic"))
+                .andExpect(jsonPath("$.data[0].fontFamily").value("Times New Roman"))
+                .andExpect(jsonPath("$.data[1].id").value("modern"))
+                .andExpect(jsonPath("$.data[1].accentColorHex").value("#4F46E5"))
+                .andExpect(jsonPath("$.data[2].id").value("fresher-focus"))
+                .andExpect(jsonPath("$.data[3].id").value("executive"));
+    }
+
+    @Test
+    void testGenerateFixedResume_WithTemplate_AppliesSuccessfully() throws Exception {
+        // 1. Analyze text resume
+        AnalysisRequest request = new AnalysisRequest();
+        request.setResumeText("""
+                Grace Hopper
+                grace@navy.mil | 555-0144
+                SUMMARY
+                Pioneer of computer programming and compiler development.
+                EXPERIENCE
+                Rear Admiral at US Navy
+                - Created first compiler for programming languages
+                SKILLS
+                COBOL, Compilers, Systems
+                """);
+        request.setJobDescription("Looking for a software engineer with Compiler and Systems experience");
+
+        MvcResult analyzeResult = mockMvc.perform(post("/api/v1/analyze")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Map<String, Object> map = objectMapper.readValue(analyzeResult.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> data = (Map<String, Object>) map.get("data");
+        String analysisId = (String) data.get("analysisId");
+
+        // 2. Generate with "modern" template
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "modern"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.templateId").value("modern"))
+                .andExpect(jsonPath("$.data.templateName").value("Modern"))
+                .andExpect(jsonPath("$.data.fixesApplied", hasItem("Applied the 'Modern' template")));
+
+        // 3. Download and verify font is Calibri
+        MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        byte[] bytes = downloadResult.getResponse().getContentAsByteArray();
+        try (XWPFDocument doc = new XWPFDocument(new java.io.ByteArrayInputStream(bytes))) {
+            assertFalse(doc.getParagraphs().isEmpty());
+            assertEquals("Calibri", doc.getParagraphs().get(0).getRuns().get(0).getFontFamily());
+        }
+    }
+
+    @Test
+    void testGenerateFixedResume_WithInvalidTemplate_Returns400() throws Exception {
+        AnalysisRequest request = new AnalysisRequest();
+        request.setResumeText("Ada Lovelace\nada@analytical.org\nEXPERIENCE\nMathematician");
+        request.setJobDescription("Looking for a Mathematician");
+
+        MvcResult analyzeResult = mockMvc.perform(post("/api/v1/analyze")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Map<String, Object> map = objectMapper.readValue(analyzeResult.getResponse().getContentAsString(), Map.class);
+        String analysisId = (String) ((Map<String, Object>) map.get("data")).get("analysisId");
+
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "non-existent-template"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message", containsString("Unknown templateId")));
+    }
+
+    @Test
     void testHealthCheck() throws Exception {
         mockMvc.perform(get("/healthz"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("healthy"));
     }
 }
+

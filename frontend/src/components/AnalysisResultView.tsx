@@ -1,6 +1,65 @@
-import React, { useState } from 'react';
-import { AnalysisResult, AnalysisFileResult, FormattingWarning, FixResumeResult, ResumeData } from '../types';
+import React, { useState, useEffect } from 'react';
+import { AnalysisResult, AnalysisFileResult, FormattingWarning, FixResumeResult, ResumeData, ResumeTemplate } from '../types';
 import { apiFetch } from '../lib/apiClient';
+
+const ORIGINAL_TEMPLATE: ResumeTemplate = {
+  id: 'original',
+  name: 'Original layout',
+  description: "Keeps today's exact document layout and structure",
+  fontFamily: 'Calibri',
+  accentColorHex: '#1d1d1f',
+  nameAlignment: 'LEFT',
+  headingCase: 'UPPER',
+  showDividerLine: false,
+  sectionOrder: ['EXPERIENCE', 'EDUCATION', 'SKILLS'],
+};
+
+const DEFAULT_TEMPLATES: ResumeTemplate[] = [
+  {
+    id: 'classic',
+    name: 'Classic',
+    description: 'Traditional serif typography with centered header and academic priority',
+    fontFamily: 'Times New Roman',
+    accentColorHex: '#000000',
+    nameAlignment: 'CENTER',
+    headingCase: 'UPPER',
+    showDividerLine: true,
+    sectionOrder: ['EDUCATION', 'EXPERIENCE', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS'],
+  },
+  {
+    id: 'modern',
+    name: 'Modern',
+    description: 'Sleek sans-serif style with indigo accents and skills-forward hierarchy',
+    fontFamily: 'Calibri',
+    accentColorHex: '#4F46E5',
+    nameAlignment: 'LEFT',
+    headingCase: 'TITLE',
+    showDividerLine: false,
+    sectionOrder: ['SKILLS', 'EXPERIENCE', 'PROJECTS', 'EDUCATION', 'CERTIFICATIONS'],
+  },
+  {
+    id: 'fresher-focus',
+    name: 'Fresher Focus',
+    description: 'Teal accents highlighting education and projects for students',
+    fontFamily: 'Arial',
+    accentColorHex: '#0F766E',
+    nameAlignment: 'LEFT',
+    headingCase: 'UPPER',
+    showDividerLine: true,
+    sectionOrder: ['EDUCATION', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS', 'EXPERIENCE'],
+  },
+  {
+    id: 'executive',
+    name: 'Executive',
+    description: 'Distinguished navy Georgia serif emphasizing leadership experience',
+    fontFamily: 'Georgia',
+    accentColorHex: '#1E3A8A',
+    nameAlignment: 'CENTER',
+    headingCase: 'UPPER',
+    showDividerLine: true,
+    sectionOrder: ['EXPERIENCE', 'SKILLS', 'EDUCATION', 'PROJECTS', 'CERTIFICATIONS'],
+  },
+];
 
 interface AnalysisResultViewProps {
   result: AnalysisResult | AnalysisFileResult;
@@ -17,6 +76,30 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
   const [isFixing, setIsFixing] = useState(false);
   const [fixResult, setFixResult] = useState<FixResumeResult | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<ResumeTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('original');
+
+  useEffect(() => {
+    let isMounted = true;
+    apiFetch('/api/v1/templates')
+      .then(async res => {
+        if (res.ok) {
+          const json = await res.json();
+          const list = json.data ?? json;
+          if (isMounted && Array.isArray(list) && list.length > 0) {
+            setTemplates(list);
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback to DEFAULT_TEMPLATES if API not reached yet
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const allTemplates = [ORIGINAL_TEMPLATE, ...(templates.length ? templates : DEFAULT_TEMPLATES)];
 
   const score = result.atsScore ?? 0;
   const analysisId = result.analysisId || null;
@@ -62,7 +145,10 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
       const res = await apiFetch('/api/v1/generate-fixed-resume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysisId }),
+        body: JSON.stringify({
+          analysisId,
+          templateId: selectedTemplateId !== 'original' ? selectedTemplateId : undefined,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ message: 'Fix failed.' }));
@@ -82,6 +168,121 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
     const base = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
     window.open(`${base}${fixResult.downloadUrl}`, '_blank');
   };
+
+  const renderTemplatePicker = (titleNote?: string) => (
+    <div className="space-y-3 pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <div>
+          <label className="text-[14px] font-semibold text-[#1d1d1f] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-indigo-600">style</span>
+            Choose a resume template
+          </label>
+          <p className="text-[12px] text-neutral-500 font-normal mt-0.5">
+            {titleNote || 'Select an ATS-compliant layout to format your downloadable Word document'}
+          </p>
+        </div>
+        <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline">
+          {selectedTemplateId === 'original'
+            ? 'Original layout selected'
+            : `${allTemplates.find(t => t.id === selectedTemplateId)?.name} selected`}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {allTemplates.map(tmpl => {
+          const isSelected = selectedTemplateId === tmpl.id;
+          const previewSections = tmpl.id === 'original'
+            ? ['EXPERIENCE', 'EDUCATION', 'SKILLS']
+            : (tmpl.sectionOrder || ['EXPERIENCE', 'EDUCATION', 'SKILLS']).slice(0, 3);
+
+          return (
+            <button
+              key={tmpl.id}
+              type="button"
+              onClick={() => setSelectedTemplateId(tmpl.id)}
+              className={`relative text-left p-3 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
+                isSelected
+                  ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-500/25 shadow-xs'
+                  : 'border-black/[0.08] bg-white hover:border-black/20 hover:bg-neutral-50/60 shadow-2xs'
+              }`}
+            >
+              {/* Card Header */}
+              <div className="flex items-start justify-between gap-1.5 mb-2.5">
+                <div className="min-w-0 pr-1">
+                  <span className="text-[13px] font-semibold text-[#1d1d1f] leading-snug block truncate">
+                    {tmpl.name}
+                  </span>
+                  <span className="text-[10.5px] text-neutral-400 line-clamp-1 block leading-tight mt-0.5">
+                    {tmpl.description}
+                  </span>
+                </div>
+                <span
+                  className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center transition-colors ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'border border-neutral-300 group-hover:border-neutral-400'
+                  }`}
+                >
+                  {isSelected && <span className="material-symbols-outlined text-[11px] font-bold">check</span>}
+                </span>
+              </div>
+
+              {/* Mini CSS Page Preview */}
+              <div
+                className="w-full h-32 bg-white rounded-xl border border-black/[0.06] p-2 flex flex-col gap-1 overflow-hidden pointer-events-none select-none text-[8px] shadow-2xs transition-transform duration-200 group-hover:scale-[1.01]"
+                style={{ fontFamily: tmpl.fontFamily }}
+              >
+                {/* Header preview */}
+                <div
+                  className={`font-bold text-[9px] text-[#1d1d1f] leading-none ${
+                    tmpl.nameAlignment === 'CENTER' ? 'text-center' : 'text-left'
+                  }`}
+                >
+                  Jane Doe
+                </div>
+
+                {/* Contact preview */}
+                <div
+                  className={`text-[6.5px] text-neutral-400 leading-none pb-0.5 ${
+                    tmpl.nameAlignment === 'CENTER' ? 'text-center' : 'text-left'
+                  }`}
+                >
+                  jane@example.com • 555-0199
+                </div>
+
+                {/* Section headings preview */}
+                <div className="flex flex-col gap-1.5 mt-0.5 border-t border-black/[0.04] pt-1">
+                  {previewSections.map((sec, idx) => {
+                    const headingText =
+                      tmpl.headingCase === 'TITLE'
+                        ? sec.charAt(0) + sec.slice(1).toLowerCase()
+                        : sec.toUpperCase();
+
+                    return (
+                      <div key={idx} className="flex flex-col gap-0.5">
+                        <div
+                          className={`font-bold text-[7.5px] leading-tight ${
+                            tmpl.showDividerLine ? 'border-b border-black/[0.15] pb-0.5' : ''
+                          }`}
+                          style={{ color: tmpl.accentColorHex }}
+                        >
+                          {headingText}
+                        </div>
+                        <div className="flex flex-col gap-0.5 pl-0.5">
+                          <div className="h-0.5 bg-neutral-200/80 rounded-full w-full"></div>
+                          <div className="h-0.5 bg-neutral-200/60 rounded-full w-3/4"></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full max-w-5xl mx-auto px-6 md:px-12 py-10 flex flex-col gap-8 animate-entrance">
@@ -441,7 +642,7 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                 </button>
               </div>
             ) : !fixResult ? (
-              <div className="space-y-4 pt-2">
+              <div className="space-y-5 pt-2">
                 <div className="p-4 rounded-2xl bg-[#f5f5f7] border border-black/[0.04] text-[13px] text-neutral-600 space-y-1.5">
                   <p className="font-semibold text-[#1d1d1f]">What Auto-Fix will do:</p>
                   <ul className="list-disc list-inside space-y-1 text-neutral-500 font-normal leading-relaxed">
@@ -451,6 +652,9 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                     <li>Append missing keywords into a dedicated Skills section and recalculate score</li>
                   </ul>
                 </div>
+
+                {/* Choose a resume template before generate button */}
+                {renderTemplatePicker()}
 
                 <button
                   type="button"
@@ -495,6 +699,13 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                       </span>
                       <h4 className="text-xl font-semibold text-[#1d1d1f] mt-2">Score Improvement</h4>
                       <p className="text-[13px] text-neutral-500 font-normal">Rescored on newly generated document content</p>
+                      <div className="flex items-center gap-2 mt-2.5">
+                        <span className="text-[12px] font-medium text-neutral-500">Template used:</span>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-emerald-200 text-[#1d1d1f] text-[12px] font-semibold shadow-2xs">
+                          <span className="material-symbols-outlined text-[15px] text-emerald-600">style</span>
+                          {fixResult.templateName || (allTemplates.find(t => t.id === fixResult.templateId)?.name) || 'Original layout'}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3 bg-white px-5 py-3.5 rounded-2xl shadow-2xs border border-emerald-200/50">
@@ -542,7 +753,12 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                     </ul>
                   </div>
 
-                  {/* Download Button */}
+                  {/* Pick another template and regenerate */}
+                  <div className="pt-2 border-t border-emerald-100/70">
+                    {renderTemplatePicker('Switch template and regenerate')}
+                  </div>
+
+                  {/* Download and Re-generate buttons */}
                   <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <button
                       type="button"
@@ -556,9 +772,10 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                       type="button"
                       onClick={handleAutoFix}
                       disabled={isFixing}
-                      className="text-[13px] font-medium py-3 px-5 rounded-2xl bg-white text-[#1d1d1f] hover:bg-[#f5f5f7] border border-black/[0.06] transition-all duration-300 cursor-pointer text-center active:scale-[0.98]"
+                      className="text-[13px] font-medium py-3 px-5 rounded-2xl bg-white text-[#1d1d1f] hover:bg-[#f5f5f7] border border-black/[0.06] transition-all duration-300 cursor-pointer text-center active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
-                      Re-run Fix
+                      <span className="material-symbols-outlined text-[16px]">refresh</span>
+                      <span>Re-generate with {allTemplates.find(t => t.id === selectedTemplateId)?.name || 'Selected Template'}</span>
                     </button>
                   </div>
                 </div>

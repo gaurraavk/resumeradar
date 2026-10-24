@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.resumeradar.model.ResumeTemplate;
+
 @RestController
 @RequestMapping("/api/v1")
 public class AnalysisController {
@@ -21,17 +23,33 @@ public class AnalysisController {
     private final FormattingAnalysisService formattingAnalysisService;
     private final ResumeFixService resumeFixService;
     private final AnalysisSessionStore sessionStore;
+    private final TemplateCatalog templateCatalog;
+    private final TemplateResumeService templateResumeService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AnalysisController(AnalysisService analysisService,
+                              AtsKeywordService atsKeywordService,
+                              FormattingAnalysisService formattingAnalysisService,
+                              ResumeFixService resumeFixService,
+                              AnalysisSessionStore sessionStore,
+                              TemplateCatalog templateCatalog,
+                              TemplateResumeService templateResumeService) {
+        this.analysisService = analysisService;
+        this.atsKeywordService = atsKeywordService;
+        this.formattingAnalysisService = formattingAnalysisService;
+        this.resumeFixService = resumeFixService;
+        this.sessionStore = sessionStore;
+        this.templateCatalog = templateCatalog;
+        this.templateResumeService = templateResumeService;
+    }
 
     public AnalysisController(AnalysisService analysisService,
                               AtsKeywordService atsKeywordService,
                               FormattingAnalysisService formattingAnalysisService,
                               ResumeFixService resumeFixService,
                               AnalysisSessionStore sessionStore) {
-        this.analysisService = analysisService;
-        this.atsKeywordService = atsKeywordService;
-        this.formattingAnalysisService = formattingAnalysisService;
-        this.resumeFixService = resumeFixService;
-        this.sessionStore = sessionStore;
+        this(analysisService, atsKeywordService, formattingAnalysisService, resumeFixService, sessionStore,
+                new TemplateCatalog(), new TemplateResumeService(new ResumeSectionParser()));
     }
 
     // Existing text-only endpoint - updated to store session in AnalysisSessionStore and support fix/download
@@ -130,7 +148,12 @@ public class AnalysisController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // Task 5: Generate fixed resume with before/after score comparison
+    @GetMapping("/templates")
+    public ResponseEntity<ApiResponse<List<ResumeTemplate>>> getTemplates() {
+        return ResponseEntity.ok(ApiResponse.success(templateCatalog.getAllTemplates()));
+    }
+
+    // Task 5: Generate fixed resume with before/after score comparison and optional template
     @PostMapping("/generate-fixed-resume")
     public ResponseEntity<ApiResponse<FixResumeResponse>> generateFixedResume(@RequestBody Map<String, String> request) {
         String analysisId = request.get("analysisId");
@@ -149,14 +172,42 @@ public class AnalysisController {
                     .body(ApiResponse.error("Auto-fix is only available for .docx uploads or text resumes. PDF files cannot be rebuilt."));
         }
 
+        String templateId = request.get("templateId");
+        if (templateId != null && templateId.isBlank()) {
+            templateId = null;
+        }
+
+        ResumeTemplate selectedTemplate = null;
+        if (templateId != null && !templateId.equalsIgnoreCase("original")) {
+            Optional<ResumeTemplate> optTemplate = templateCatalog.findById(templateId);
+            if (optTemplate.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Unknown templateId: " + templateId));
+            }
+            selectedTemplate = optTemplate.get();
+        }
+
         ResumeFixService.FixResult fixResult = resumeFixService.fixResume(analysisId);
         String downloadUrl = "/api/v1/download/fixed-resume/" + analysisId;
+
+        List<String> fixes = new ArrayList<>(fixResult.getFixesApplied());
+        String resTemplateId = "original";
+        String resTemplateName = "Original layout";
+
+        if (selectedTemplate != null) {
+            byte[] templateBytes = templateResumeService.render(fixResult.getFixedText(), selectedTemplate);
+            session.setFixedDocxBytes(templateBytes);
+            fixes.add("Applied the '" + selectedTemplate.getName() + "' template");
+            resTemplateId = selectedTemplate.getId();
+            resTemplateName = selectedTemplate.getName();
+        }
 
         FixResumeResponse response = new FixResumeResponse(
                 fixResult.getOriginalScore(),
                 fixResult.getImprovedScore(),
-                fixResult.getFixesApplied(),
-                downloadUrl
+                fixes,
+                downloadUrl,
+                resTemplateId,
+                resTemplateName
         );
         return ResponseEntity.ok(ApiResponse.success(response));
     }

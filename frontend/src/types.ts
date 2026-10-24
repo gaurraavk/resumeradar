@@ -73,11 +73,25 @@ export interface AnalysisFileResult {
   missingSections?: string[];
 }
 
+export interface ResumeTemplate {
+  id: string;
+  name: string;
+  description: string;
+  fontFamily: string;
+  accentColorHex: string;
+  nameAlignment: 'LEFT' | 'CENTER';
+  headingCase: 'UPPER' | 'TITLE';
+  showDividerLine: boolean;
+  sectionOrder: string[];
+}
+
 export interface FixResumeResult {
   originalScore?: number;
   improvedScore?: number;
   fixesApplied: string[];
   downloadUrl: string;
+  templateId?: string;
+  templateName?: string;
 }
 
 export interface BestFitResult {

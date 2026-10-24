@@ -8,6 +8,8 @@ public class FixResumeResponse {
     private int improvedScore;
     private List<String> fixesApplied;
     private String downloadUrl;
+    private String templateId;
+    private String templateName;
 
     public FixResumeResponse() {}
 
@@ -21,6 +23,15 @@ public class FixResumeResponse {
         this.improvedScore = improvedScore;
         this.fixesApplied = fixesApplied;
         this.downloadUrl = downloadUrl;
+    }
+
+    public FixResumeResponse(int originalScore, int improvedScore, List<String> fixesApplied, String downloadUrl, String templateId, String templateName) {
+        this.originalScore = originalScore;
+        this.improvedScore = improvedScore;
+        this.fixesApplied = fixesApplied;
+        this.downloadUrl = downloadUrl;
+        this.templateId = templateId;
+        this.templateName = templateName;
     }
 
     public int getOriginalScore() {
@@ -53,5 +64,21 @@ public class FixResumeResponse {
 
     public void setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
+    }
+
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
     }
 }
