@@ -55,31 +55,52 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStartAnalysis }) => 
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start">
-            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs">
+          <div
+            onClick={onStartAnalysis}
+            className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start cursor-pointer active:scale-[0.99] group"
+            title="Click to start analysis"
+          >
+            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs group-hover:bg-[#15263c] group-hover:text-[#fbf9f4] transition-colors">
               <span className="material-symbols-outlined text-[24px]">upload_file</span>
             </div>
-            <h3 className="text-lg font-bold text-[#15263c] mb-2">1. Upload</h3>
+            <h3 className="text-lg font-bold text-[#15263c] mb-2 flex items-center gap-1.5">
+              <span>1. Upload</span>
+              <span className="material-symbols-outlined text-[16px] text-[#15263c]/40 group-hover:text-[#15263c] group-hover:translate-x-0.5 transition-all">arrow_forward</span>
+            </h3>
             <p className="text-[14px] text-[#15263c]/70 leading-relaxed font-normal">
               Upload your resume (.pdf or .docx) and paste the target job description.
             </p>
           </div>
 
-          <div className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start">
-            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs">
+          <div
+            onClick={onStartAnalysis}
+            className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start cursor-pointer active:scale-[0.99] group"
+            title="Click to start analysis"
+          >
+            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs group-hover:bg-[#15263c] group-hover:text-[#fbf9f4] transition-colors">
               <span className="material-symbols-outlined text-[24px]">radar</span>
             </div>
-            <h3 className="text-lg font-bold text-[#15263c] mb-2">2. ATS Match</h3>
+            <h3 className="text-lg font-bold text-[#15263c] mb-2 flex items-center gap-1.5">
+              <span>2. ATS Match</span>
+              <span className="material-symbols-outlined text-[16px] text-[#15263c]/40 group-hover:text-[#15263c] group-hover:translate-x-0.5 transition-all">arrow_forward</span>
+            </h3>
             <p className="text-[14px] text-[#15263c]/70 leading-relaxed font-normal">
               Our deterministic engine cross-references keywords and skills to compute your real ATS match score.
             </p>
           </div>
 
-          <div className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start">
-            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs">
+          <div
+            onClick={onStartAnalysis}
+            className="glass-card hover:-translate-y-1 rounded-3xl p-8 transition-all duration-300 flex flex-col items-start cursor-pointer active:scale-[0.99] group"
+            title="Click to start analysis"
+          >
+            <div className="w-12 h-12 bg-white/70 border border-[#15263c]/10 rounded-2xl flex items-center justify-center mb-6 text-[#15263c] shadow-2xs group-hover:bg-[#15263c] group-hover:text-[#fbf9f4] transition-colors">
               <span className="material-symbols-outlined text-[24px]">auto_fix_high</span>
             </div>
-            <h3 className="text-lg font-bold text-[#15263c] mb-2">3. Auto-Fix</h3>
+            <h3 className="text-lg font-bold text-[#15263c] mb-2 flex items-center gap-1.5">
+              <span>3. Auto-Fix</span>
+              <span className="material-symbols-outlined text-[16px] text-[#15263c]/40 group-hover:text-[#15263c] group-hover:translate-x-0.5 transition-all">arrow_forward</span>
+            </h3>
             <p className="text-[14px] text-[#15263c]/70 leading-relaxed font-normal">
               Automatically fix formatting, strengthen action verbs, and add missing keywords — download the optimized .docx.
             </p>

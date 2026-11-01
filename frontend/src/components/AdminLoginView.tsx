@@ -89,6 +89,7 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
           </label>
 
           <button
+            type="submit"
             disabled={loading}
             className="w-full bg-[#15263c] text-[#fbf9f4] font-medium text-[14px] py-3.5 rounded-full disabled:opacity-50 hover:bg-[#1f3757] transition-all duration-200 cursor-pointer active:scale-[0.98] shadow-[0_4px_16px_rgba(21,38,60,0.18)] mt-2"
           >

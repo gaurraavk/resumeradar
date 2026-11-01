@@ -17,6 +17,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   loading = false,
   className = '',
   disabled,
+  type = 'button',
   ...props
 }) => {
   const variantStyles: Record<GlassButtonVariant, string> = {
@@ -38,6 +39,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 
   return (
     <button
+      type={type}
       disabled={disabled || loading}
       className={`inline-flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-[0.98] select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
         variantStyles[variant]

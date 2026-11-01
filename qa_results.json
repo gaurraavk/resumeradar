@@ -1,0 +1,310 @@
+{
+  "total": 43,
+  "passed": 43,
+  "fixed": 0,
+  "failed": 0,
+  "blocked": 0,
+  "results": [
+    {
+      "page": "Landing",
+      "element": "Brand Logo",
+      "expected": "Navigate to Overview",
+      "result": "Clicked and remained on Overview",
+      "status": "PASS"
+    },
+    {
+      "page": "Landing",
+      "element": "Navbar Links Count",
+      "expected": "5 navigation items",
+      "result": "Found 5 items",
+      "status": "PASS"
+    },
+    {
+      "page": "Landing",
+      "element": "Hero \"Start Analysis\" CTA",
+      "expected": "Navigates to ATS Scan workbench",
+      "result": "Navigated: \"ATS Match & Optimization Scan\"",
+      "status": "PASS"
+    },
+    {
+      "page": "Landing",
+      "element": "How it works cards",
+      "expected": "3 clickable interactive process cards",
+      "result": "Found 3 interactive cards",
+      "status": "PASS"
+    },
+    {
+      "page": "Landing",
+      "element": "Step 1 Card Click",
+      "expected": "Navigates to ATS Scan",
+      "result": "Navigated to ATS Match & Optimization Scan",
+      "status": "PASS"
+    },
+    {
+      "page": "ATS Scan",
+      "element": "Paste Text Mode Button",
+      "expected": "Switches to textarea input mode",
+      "result": "Textarea rendered",
+      "status": "PASS"
+    },
+    {
+      "page": "ATS Scan",
+      "element": "Analyze Match Disabled State",
+      "expected": "Disabled when inputs empty",
+      "result": "Disabled",
+      "status": "PASS"
+    },
+    {
+      "page": "ATS Scan",
+      "element": "Analyze Match Ready State",
+      "expected": "Enabled after valid inputs",
+      "result": "Enabled",
+      "status": "PASS"
+    },
+    {
+      "page": "ATS Scan",
+      "element": "Analyze Match API Execution",
+      "expected": "Real backend response & navigation to results",
+      "result": "ATS Match Results",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "ATS Score Gauge",
+      "expected": "Calculated numeric score",
+      "result": "Score: 64/100",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "Matched Keywords Card Click",
+      "expected": "Switches to All Keywords tab",
+      "result": "Active",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "Resume Templates Loaded",
+      "expected": "Multiple selectable layout templates",
+      "result": "Found 4 template options",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "Generate Fixed Resume (.docx)",
+      "expected": "Optimizes layout & recalculates improved score",
+      "result": "Optimization Complete displayed",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "Download Fixed Resume Button",
+      "expected": "Visible and ready for Word export",
+      "result": "Present",
+      "status": "PASS"
+    },
+    {
+      "page": "Results",
+      "element": "New Analysis Button",
+      "expected": "Returns to fresh ATS Scan workbench",
+      "result": "Returned",
+      "status": "PASS"
+    },
+    {
+      "page": "Best Fit",
+      "element": "Add Another Job Button",
+      "expected": "Appends new job row",
+      "result": "Job count increased",
+      "status": "PASS"
+    },
+    {
+      "page": "Best Fit",
+      "element": "Remove Job Button",
+      "expected": "Removes specific job row",
+      "result": "Job row removed",
+      "status": "PASS"
+    },
+    {
+      "page": "Best Fit",
+      "element": "Compare All Jobs API Execution",
+      "expected": "Calculates match score ranking",
+      "result": "Rankings displayed",
+      "status": "PASS"
+    },
+    {
+      "page": "Best Fit",
+      "element": "Details / Hide Toggle Button",
+      "expected": "Expands/collapses keyword breakdown",
+      "result": "Toggled details",
+      "status": "PASS"
+    },
+    {
+      "page": "Best Fit",
+      "element": "Reset Button",
+      "expected": "Clears resume and job fields",
+      "result": "Cleared",
+      "status": "PASS"
+    },
+    {
+      "page": "Compare",
+      "element": "Load Realistic Sample Button",
+      "expected": "Populates A/B sample text",
+      "result": "Populated",
+      "status": "PASS"
+    },
+    {
+      "page": "Compare",
+      "element": "Compare Versions API Execution",
+      "expected": "Outputs side-by-side winner & newly added keywords",
+      "result": "Winner banner displayed",
+      "status": "PASS"
+    },
+    {
+      "page": "Quality",
+      "element": "Load Mediocre Sample Button",
+      "expected": "Loads mediocre resume text",
+      "result": "Populated",
+      "status": "PASS"
+    },
+    {
+      "page": "Quality",
+      "element": "Analyze Resume Quality API Execution",
+      "expected": "Computes structural scorecard & checklist",
+      "result": "Scorecard displayed",
+      "status": "PASS"
+    },
+    {
+      "page": "Quality",
+      "element": "Load Strong Sample Button",
+      "expected": "Loads strong resume text",
+      "result": "Populated",
+      "status": "PASS"
+    },
+    {
+      "page": "Auth",
+      "element": "Create Account Mode Toggle",
+      "expected": "Shows Full Name input field",
+      "result": "Visible",
+      "status": "PASS"
+    },
+    {
+      "page": "Auth",
+      "element": "Show/Hide Password Button",
+      "expected": "Toggles input type text/password",
+      "result": "text",
+      "status": "PASS"
+    },
+    {
+      "page": "Auth",
+      "element": "Registration API Execution & Auto Sign-In",
+      "expected": "Registers user, persists JWT, and updates header",
+      "result": "Authenticated as Jane QA Tester",
+      "status": "PASS"
+    },
+    {
+      "page": "History",
+      "element": "History Nav Link",
+      "expected": "Navigates to Analysis History",
+      "result": "Analysis History",
+      "status": "PASS"
+    },
+    {
+      "page": "History",
+      "element": "Refresh History Button",
+      "expected": "Re-queries user scan history",
+      "result": "Executed without errors",
+      "status": "PASS"
+    },
+    {
+      "page": "Auth",
+      "element": "Sign Out Button",
+      "expected": "Clears session and restores Sign in button",
+      "result": "Signed out",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin",
+      "element": "Admin Shield Icon Nav",
+      "expected": "Navigates to Admin Portal",
+      "result": "Admin Portal",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin",
+      "element": "Admin Show/Hide Password",
+      "expected": "Toggles admin password visibility",
+      "result": "Toggled",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin",
+      "element": "Admin Authentication API Execution",
+      "expected": "Validates credentials & unlocks telemetry dashboard",
+      "result": "Platform Analytics & Control",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "Tab: Users",
+      "expected": "Switches to Users panel",
+      "result": "Rendered Users panel",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "Tab: Recent Activity",
+      "expected": "Switches to Recent Activity panel",
+      "result": "Rendered Recent Activity panel",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "Tab: System & Engine",
+      "expected": "Switches to System & Engine panel",
+      "result": "Rendered System & Engine panel",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "Tab: Overview",
+      "expected": "Switches to Overview panel",
+      "result": "Rendered Overview panel",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "View Scanner Button",
+      "expected": "Navigates back to application scanner",
+      "result": "ATS Match & Optimization Scan",
+      "status": "PASS"
+    },
+    {
+      "page": "Admin Dashboard",
+      "element": "Admin Sign Out Button",
+      "expected": "Revokes admin session and redirects home",
+      "result": "Precision resume analysis.Instant results.",
+      "status": "PASS"
+    },
+    {
+      "page": "Mobile",
+      "element": "Hamburger Menu Toggle Button",
+      "expected": "Expands mobile navigation drawer",
+      "result": "Drawer open",
+      "status": "PASS"
+    },
+    {
+      "page": "Mobile",
+      "element": "Mobile Drawer Navigation",
+      "expected": "Navigates to selected view and closes menu",
+      "result": "ATS Match & Optimization Scan",
+      "status": "PASS"
+    },
+    {
+      "page": "Global",
+      "element": "Browser Console Errors",
+      "expected": "Zero unhandled frontend exceptions",
+      "result": "0 errors found: ",
+      "status": "PASS"
+    }
+  ]
+}

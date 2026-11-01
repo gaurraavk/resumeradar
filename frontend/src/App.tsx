@@ -276,15 +276,23 @@ export function App() {
           />
         )}
 
-        {currentTab === 'analysis-result' && analysisResult && currentResume && (
-          <AnalysisResultView
-            result={analysisResult}
-            resume={currentResume}
-            onNewScan={() => handleNavigate('new-analysis')}
-            isLoggedIn={!!currentUser}
-            onNavigateToAuth={() => handleNavigate('auth')}
-            onReRunAnalysis={handleReRunAnalysis}
-          />
+        {currentTab === 'analysis-result' && (
+          analysisResult && currentResume ? (
+            <AnalysisResultView
+              result={analysisResult}
+              resume={currentResume}
+              onNewScan={() => handleNavigate('new-analysis')}
+              isLoggedIn={!!currentUser}
+              onNavigateToAuth={() => handleNavigate('auth')}
+              onReRunAnalysis={handleReRunAnalysis}
+            />
+          ) : (
+            <NewAnalysisView
+              onRunAnalysis={handleRunAnalysis}
+              onRunFileAnalysis={handleRunFileAnalysis}
+              isLoading={isAnalyzing}
+            />
+          )
         )}
 
         {currentTab === 'auth' && (
