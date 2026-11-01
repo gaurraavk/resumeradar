@@ -61,14 +61,9 @@ export const TopNav: React.FC<TopNavProps> = ({
               <span className="relative z-10">RR</span>
               <div className="absolute inset-0 bg-gradient-to-tr from-[#15d6e6]/30 via-transparent to-[#f2b6a7]/20 pointer-events-none" />
             </div>
-            <div className="flex flex-col text-left">
-              <span className="font-bold text-[15px] tracking-tight leading-none text-[#15263c]">
-                ResumeRadar
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-wider text-[#15263c]/50 mt-0.5">
-                ATS · Engineering
-              </span>
-            </div>
+            <span className="font-bold text-[16px] tracking-tight text-[#15263c]">
+              ResumeRadar
+            </span>
           </button>
 
           {/* Editorial Nav Links */}
