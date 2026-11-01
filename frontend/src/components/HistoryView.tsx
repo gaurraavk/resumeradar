@@ -68,18 +68,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   return (
     <div className="w-full max-w-6xl mx-auto px-6 md:px-12 py-10 flex flex-col gap-6 animate-entrance">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-semibold tracking-wide border border-indigo-200/50">
-              MY HISTORY
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
+              USER ARCHIVE // ANALYSIS RECORDS
             </span>
-            {userEmail && <span className="text-[13px] text-neutral-400 font-normal">({userEmail})</span>}
+            {userEmail && <span className="font-mono text-[11px] text-[#15263c]/50">({userEmail})</span>}
           </div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] tracking-tight mt-1">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
             Analysis History
           </h1>
-          <p className="text-[13px] text-neutral-500 font-normal mt-0.5">
+          <p className="text-[14.5px] text-[#15263c]/75 font-normal mt-1">
             View your past resume scans, score trends, and matched keyword records.
           </p>
         </div>
@@ -88,7 +89,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           <button
             onClick={fetchHistory}
             disabled={loading}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-[#1d1d1f] bg-white hover:bg-[#f5f5f7] border border-black/[0.08] px-3.5 py-2 rounded-2xl shadow-2xs transition-all duration-200 cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full shadow-2xs backdrop-blur-md transition-all duration-200 cursor-pointer disabled:opacity-50 active:scale-[0.98]"
           >
             <span className={`material-symbols-outlined text-[16px] ${loading ? 'animate-spin' : ''}`}>
               refresh
@@ -97,7 +98,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           </button>
           <button
             onClick={onNavigateToScanner}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-white bg-[#1d1d1f] hover:bg-black px-4 py-2 rounded-2xl shadow-2xs transition-all duration-200 cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-[#fbf9f4] bg-[#15263c] hover:bg-[#1f3757] px-4 py-2 rounded-full shadow-[0_4px_16px_rgba(21,38,60,0.18)] transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             <span>New Scan</span>

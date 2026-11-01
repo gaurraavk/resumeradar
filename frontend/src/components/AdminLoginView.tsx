@@ -40,14 +40,17 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center px-6 py-12 bg-[#f5f5f7] animate-entrance">
-      <div className="w-full max-w-md macos-card-elevated p-8 md:p-10 rounded-3xl">
+    <div className="w-full min-h-[calc(100vh-140px)] flex items-center justify-center px-6 py-12 animate-entrance">
+      <div className="w-full max-w-md glass-card p-8 md:p-10 rounded-3xl shadow-[0_16px_48px_rgba(21,38,60,0.08)]">
         <div className="text-center space-y-2 mb-8">
-          <div className="w-11 h-11 rounded-2xl bg-[#1d1d1f] text-white flex items-center justify-center font-semibold text-base mx-auto shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center font-mono font-bold text-base mx-auto shadow-xs">
             RR
           </div>
-          <h1 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">Admin Portal</h1>
-          <p className="text-[13px] text-neutral-400 font-normal">Sign in with your administrator credentials.</p>
+          <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold block">
+            ADMIN // SECURE GATEWAY
+          </span>
+          <h1 className="text-2xl font-extrabold text-[#15263c] tracking-tight">Admin Portal</h1>
+          <p className="text-[13.5px] text-[#15263c]/70 font-normal">Sign in with your administrator credentials.</p>
         </div>
 
         {error && (
@@ -57,18 +60,18 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
         )}
 
         <form onSubmit={submit} className="space-y-4">
-          <label className="block text-[13px] font-medium text-neutral-600">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-[#15263c]/60 font-bold">
             Admin Email
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1.5 w-full bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] transition-all duration-300 font-normal"
+              className="mt-1.5 w-full glass-input rounded-2xl px-4 py-3 text-sm font-normal"
             />
           </label>
 
-          <label className="block text-[13px] font-medium text-neutral-600">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-[#15263c]/60 font-bold">
             Password
             <div className="relative mt-1.5">
               <input
@@ -76,12 +79,12 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white rounded-2xl px-4 py-3 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] transition-all duration-300 font-normal"
+                className="w-full glass-input rounded-2xl px-4 py-3 pr-16 text-sm font-normal"
               />
               <button
                 type="button"
                 onClick={() => setShow((v) => !v)}
-                className="absolute right-3 top-3 text-[13px] font-medium text-neutral-400 hover:text-[#1d1d1f] cursor-pointer transition-colors duration-300 active:scale-[0.98]"
+                className="absolute right-3 top-3 text-[13px] font-medium text-[#15263c]/50 hover:text-[#15263c] cursor-pointer transition-colors duration-200 active:scale-[0.98]"
               >
                 {show ? 'Hide' : 'Show'}
               </button>
@@ -90,7 +93,7 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
 
           <button
             disabled={loading}
-            className="w-full bg-[#1d1d1f] text-white font-medium text-[14px] py-3.5 rounded-2xl disabled:opacity-50 hover:bg-neutral-800 transition-all duration-300 cursor-pointer active:scale-[0.98] shadow-sm mt-2"
+            className="w-full bg-[#15263c] text-[#fbf9f4] font-medium text-[14px] py-3.5 rounded-full disabled:opacity-50 hover:bg-[#1f3757] transition-all duration-200 cursor-pointer active:scale-[0.98] shadow-[0_4px_16px_rgba(21,38,60,0.18)] mt-2"
           >
             {loading ? 'Authenticating…' : 'Sign In'}
           </button>
@@ -98,7 +101,7 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
           <button
             type="button"
             onClick={onCancel}
-            className="w-full text-[13px] font-medium text-neutral-400 hover:text-[#1d1d1f] transition-colors duration-300 cursor-pointer mt-2 active:scale-[0.98]"
+            className="w-full text-[13px] font-medium text-[#15263c]/60 hover:text-[#15263c] transition-colors duration-200 cursor-pointer mt-2 active:scale-[0.98]"
           >
             Return to Application
           </button>

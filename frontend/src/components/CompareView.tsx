@@ -95,19 +95,18 @@ export const CompareView: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 w-full animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-[#15263c]/08">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-              Module 2
+            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
+              BENCHMARK // VERSION A/B
             </span>
-            <span className="text-neutral-400 text-[12px]">·</span>
-            <span className="text-[12px] text-neutral-500 font-medium">A/B Testing & Optimization</span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#15263c]">
             Resume Version Comparison
           </h1>
-          <p className="text-[14px] text-neutral-500 mt-1 max-w-2xl">
+          <p className="text-[14.5px] text-[#15263c]/75 mt-1 max-w-2xl font-normal leading-relaxed">
             Compare two versions of your resume side-by-side against a target job description to verify newly gained keywords and score improvements.
           </p>
         </div>
@@ -115,15 +114,15 @@ export const CompareView: React.FC = () => {
         <button
           type="button"
           onClick={handleLoadSample}
-          className="self-start sm:self-auto text-[12px] font-medium text-neutral-600 hover:text-[#1d1d1f] bg-white border border-black/[0.08] px-3.5 py-1.5 rounded-xl hover:bg-neutral-50 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+          className="self-start sm:self-auto text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full shadow-2xs backdrop-blur-md transition-all cursor-pointer active:scale-[0.98]"
         >
           Load Realistic A/B Sample
         </button>
       </div>
 
       {/* Target Job Description Card */}
-      <div className="macos-card rounded-3xl p-6 border border-black/[0.06] shadow-xs mb-6">
-        <label htmlFor="compare-jd" className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">
+      <div className="glass-card rounded-3xl p-6 mb-6">
+        <label htmlFor="compare-jd" className="block text-[13px] font-bold text-[#15263c] mb-1.5">
           Target Job Description
         </label>
         <textarea
@@ -132,22 +131,22 @@ export const CompareView: React.FC = () => {
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="Paste the target job description to test both resume versions against..."
           rows={4}
-          className="w-full text-[13px] text-[#1d1d1f] bg-[#fafafa] border border-black/[0.08] rounded-2xl p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all resize-y placeholder:text-neutral-400 font-mono"
+          className="w-full text-[13px] glass-input rounded-2xl p-3.5 transition-all resize-y custom-scrollbar font-normal"
         />
       </div>
 
       {/* Side-by-side Textareas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Version A */}
-        <div className="macos-card rounded-3xl p-6 border border-black/[0.06] shadow-xs">
+        <div className="glass-card rounded-3xl p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] font-semibold text-[#1d1d1f] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-neutral-200 text-neutral-700 text-[11px] font-bold flex items-center justify-center">
+            <span className="text-[13px] font-bold text-[#15263c] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#15263c]/10 text-[#15263c] text-[11px] font-mono font-bold flex items-center justify-center">
                 A
               </span>
               Resume Version A (Original)
             </span>
-            <span className="text-[11px] text-neutral-400">
+            <span className="text-[11px] font-mono text-[#15263c]/50">
               {resumeA.trim().split(/\s+/).filter(Boolean).length} words
             </span>
           </div>
@@ -156,20 +155,20 @@ export const CompareView: React.FC = () => {
             onChange={(e) => setResumeA(e.target.value)}
             placeholder="Paste your original resume text here..."
             rows={10}
-            className="w-full text-[12.5px] text-[#1d1d1f] bg-[#fafafa] border border-black/[0.08] rounded-2xl p-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all resize-y placeholder:text-neutral-400 font-mono"
+            className="w-full text-[12.5px] glass-input rounded-2xl p-3.5 transition-all resize-y custom-scrollbar font-normal"
           />
         </div>
 
         {/* Version B */}
-        <div className="macos-card rounded-3xl p-6 border border-black/[0.06] shadow-xs">
+        <div className="glass-card rounded-3xl p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] font-semibold text-[#1d1d1f] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">
+            <span className="text-[13px] font-bold text-[#15263c] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#15263c] text-[#fbf9f4] text-[11px] font-mono font-bold flex items-center justify-center shadow-xs">
                 B
               </span>
               Resume Version B (Revised)
             </span>
-            <span className="text-[11px] text-neutral-400">
+            <span className="text-[11px] font-mono text-[#15263c]/50">
               {resumeB.trim().split(/\s+/).filter(Boolean).length} words
             </span>
           </div>
@@ -178,14 +177,14 @@ export const CompareView: React.FC = () => {
             onChange={(e) => setResumeB(e.target.value)}
             placeholder="Paste your updated or optimized resume text here..."
             rows={10}
-            className="w-full text-[12.5px] text-[#1d1d1f] bg-[#fafafa] border border-black/[0.08] rounded-2xl p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all resize-y placeholder:text-neutral-400 font-mono"
+            className="w-full text-[12.5px] glass-input rounded-2xl p-3.5 transition-all resize-y custom-scrollbar font-normal"
           />
         </div>
       </div>
 
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-        <p className="text-[12px] text-neutral-400">
+        <p className="text-[12px] font-mono text-[#15263c]/60">
           Runs ATS keyword matching deterministically on both versions simultaneously.
         </p>
 
@@ -193,7 +192,7 @@ export const CompareView: React.FC = () => {
           type="button"
           onClick={handleCompare}
           disabled={isLoading || !resumeA.trim() || !resumeB.trim() || !jobDescription.trim()}
-          className="inline-flex items-center justify-center gap-2 bg-[#1d1d1f] text-white px-7 py-3 rounded-2xl text-[13px] font-medium hover:bg-neutral-800 transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm active:scale-[0.98]"
+          className="inline-flex items-center justify-center gap-2 bg-[#15263c] text-[#fbf9f4] px-8 py-3.5 rounded-full text-[13.5px] font-medium hover:bg-[#1f3757] transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(21,38,60,0.18)] active:scale-[0.98]"
         >
           {isLoading ? (
             <>

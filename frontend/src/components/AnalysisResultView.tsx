@@ -245,18 +245,18 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
 
           const badgeText = isSidebar ? 'Two-column - visual design' : 'ATS-safe';
           const badgeClass = isSidebar
-            ? 'bg-indigo-50 text-indigo-700 border-indigo-200/60'
-            : 'bg-emerald-50 text-emerald-700 border-emerald-200/60';
+            ? 'bg-[#15263c]/10 text-[#15263c] border-[#15263c]/20'
+            : 'bg-emerald-500/15 text-emerald-800 border-emerald-500/25';
 
           return (
             <button
               key={tmpl.id}
               type="button"
               onClick={() => setSelectedTemplateId(tmpl.id)}
-              className={`relative text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
+              className={`relative text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
                 isSelected
-                  ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-500/25 shadow-xs'
-                  : 'border-black/[0.08] bg-white hover:border-black/20 hover:bg-neutral-50/60 shadow-2xs'
+                  ? 'border-[#15263c] bg-white/85 ring-2 ring-[#15263c]/20 shadow-sm'
+                  : 'border-[#15263c]/12 bg-white/45 hover:border-[#15263c]/30 hover:bg-white/70 shadow-2xs backdrop-blur-md'
               }`}
             >
               {/* Card Header */}
@@ -541,14 +541,14 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
       </div>
 
       {/* Tabs Segmented Control */}
-      <div className="flex gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04] w-fit">
+      <div className="flex gap-1 bg-white/45 backdrop-blur-md p-1.5 rounded-full border border-[#15263c]/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] w-fit">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2 rounded-xl text-[13px] font-medium cursor-pointer transition-all duration-300 active:scale-[0.98] ${
+          className={`px-4 py-2 rounded-full text-[13px] font-medium cursor-pointer transition-all duration-200 active:scale-[0.98] ${
             activeTab === 'overview'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
           }`}
         >
           Detailed Breakdown
@@ -556,25 +556,25 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('autofix')}
-          className={`px-4 py-2 rounded-xl text-[13px] font-medium cursor-pointer transition-all duration-300 active:scale-[0.98] flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-full text-[13px] font-medium cursor-pointer transition-all duration-200 active:scale-[0.98] flex items-center gap-1.5 ${
             activeTab === 'autofix'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
           }`}
         >
-          <span className="material-symbols-outlined text-[16px] text-emerald-600">auto_fix_high</span>
+          <span className="material-symbols-outlined text-[16px] text-[#15d6e6]">auto_fix_high</span>
           <span>Auto-Fix Resume</span>
           {fixResult && (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#15d6e6]"></span>
           )}
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('keywords')}
-          className={`px-4 py-2 rounded-xl text-[13px] font-medium cursor-pointer transition-all duration-300 active:scale-[0.98] ${
+          className={`px-4 py-2 rounded-full text-[13px] font-medium cursor-pointer transition-all duration-200 active:scale-[0.98] ${
             activeTab === 'keywords'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
           }`}
         >
           All Keywords ({(result.matchedKeywords?.length ?? 0) + (result.missingKeywords?.length ?? 0)})

@@ -130,18 +130,18 @@ export const BestFitView: React.FC = () => {
   return (
     <div className="w-full max-w-5xl mx-auto px-6 md:px-12 py-10 flex flex-col gap-10 animate-entrance">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-            <span className="text-[12px] font-semibold text-blue-700 tracking-wide uppercase">
-              Multi-Role Match
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
+              BENCHMARK // MULTI-ROLE MATCH
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-semibold text-[#1d1d1f] tracking-tight mt-1">
-            Best Fit Comparison
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
+            Best Fit Role Ranking
           </h1>
-          <p className="text-base text-neutral-500 mt-1 font-normal leading-relaxed">
+          <p className="text-[14.5px] text-[#15263c]/75 mt-1 font-normal leading-relaxed">
             Cross-reference one resume against multiple job descriptions to find your strongest ATS match.
           </p>
         </div>
@@ -151,16 +151,16 @@ export const BestFitView: React.FC = () => {
           <button
             type="button"
             onClick={handleLoadSample}
-            className="text-[13px] font-medium text-[#1d1d1f] bg-white hover:bg-[#f5f5f7] border border-black/[0.06] px-4 py-2 rounded-2xl shadow-2xs transition-all duration-300 cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+            className="text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full shadow-2xs backdrop-blur-md transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
             title="Populate sample resume and jobs"
           >
-            <span className="material-symbols-outlined text-[16px] text-blue-600">sample</span>
+            <span className="material-symbols-outlined text-[16px] text-[#15d6e6]">sample</span>
             <span>Load Sample Data</span>
           </button>
           <button
             type="button"
             onClick={handleClearAll}
-            className="text-[13px] font-medium text-neutral-400 hover:text-[#1d1d1f] px-3 py-2 rounded-2xl transition-colors duration-300 cursor-pointer active:scale-[0.98]"
+            className="text-[13px] font-medium text-[#15263c]/60 hover:text-[#15263c] px-3.5 py-2 rounded-full transition-colors duration-200 cursor-pointer active:scale-[0.98]"
             title="Reset form"
           >
             Reset
@@ -216,18 +216,18 @@ export const BestFitView: React.FC = () => {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-[#1d1d1f] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-neutral-500">work</span>
+            <h2 className="text-base font-bold text-[#15263c] flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px] text-[#15263c]/60">work</span>
               Target Job Descriptions ({jobs.length})
             </h2>
-            <p className="text-[13px] text-neutral-400 font-normal mt-0.5">Add 2 or more target roles to benchmark match scores</p>
+            <p className="text-[13px] text-[#15263c]/60 font-normal mt-0.5">Add 2 or more target roles to benchmark match scores</p>
           </div>
           <button
             type="button"
             onClick={addJob}
-            className="text-[13px] font-medium text-[#1d1d1f] bg-white hover:bg-[#f5f5f7] border border-black/[0.06] px-4 py-2 rounded-2xl transition-all duration-300 cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-[0.98]"
+            className="text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 shadow-2xs backdrop-blur-md active:scale-[0.98]"
           >
-            <span className="material-symbols-outlined text-[16px] text-[#1d1d1f]">add</span>
+            <span className="material-symbols-outlined text-[16px] text-[#15263c]">add</span>
             <span>Add Another Job</span>
           </button>
         </div>
@@ -236,14 +236,14 @@ export const BestFitView: React.FC = () => {
           {jobs.map((job, i) => (
             <div
               key={job.id}
-              className="macos-card rounded-3xl p-6 md:p-7 space-y-3.5 transition-all duration-300"
+              className="glass-card rounded-3xl p-6 md:p-7 space-y-3.5 transition-all duration-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-black/[0.04] text-[#1d1d1f] text-[11px] font-semibold flex items-center justify-center border border-black/[0.04]">
+                  <span className="w-6 h-6 rounded-full bg-[#15263c]/10 text-[#15263c] text-[11px] font-mono font-bold flex items-center justify-center border border-[#15263c]/15">
                     {i + 1}
                   </span>
-                  <span className="text-[13px] font-semibold text-[#1d1d1f]">
+                  <span className="text-[13.5px] font-bold text-[#15263c]">
                     {job.title.trim() || `Job Opportunity #${i + 1}`}
                   </span>
                 </div>
@@ -251,7 +251,7 @@ export const BestFitView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => removeJob(job.id)}
-                    className="text-[12px] font-medium text-neutral-400 hover:text-rose-600 px-2.5 py-1 rounded-xl hover:bg-rose-50 cursor-pointer transition-colors duration-300 flex items-center gap-1 active:scale-[0.98]"
+                    className="text-[12px] font-medium text-[#15263c]/50 hover:text-rose-700 px-2.5 py-1 rounded-xl hover:bg-rose-50/50 cursor-pointer transition-colors duration-200 flex items-center gap-1 active:scale-[0.98]"
                     title="Remove this job row"
                   >
                     <span className="material-symbols-outlined text-[15px]">delete</span>
@@ -265,7 +265,7 @@ export const BestFitView: React.FC = () => {
                 value={job.title}
                 onChange={(e) => updateJob(job.id, 'title', e.target.value)}
                 placeholder="Target Job Title (e.g., Senior Java Backend Engineer)"
-                className="w-full rounded-2xl px-4 py-2.5 text-sm bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] outline-none transition-all duration-300 font-normal"
+                className="w-full rounded-2xl px-4 py-2.5 text-sm glass-input font-normal"
               />
 
               <div className="space-y-1">
@@ -274,9 +274,9 @@ export const BestFitView: React.FC = () => {
                   onChange={(e) => updateJob(job.id, 'text', e.target.value)}
                   rows={4}
                   placeholder="Paste the full job description or key requirements here..."
-                  className="w-full resize-none rounded-2xl p-4 text-sm bg-[#f5f5f7] text-[#1d1d1f] placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-black/[0.06] border border-black/[0.04] outline-none transition-all duration-300 leading-relaxed custom-scrollbar font-normal"
+                  className="w-full resize-none rounded-2xl p-4 text-sm glass-input leading-relaxed custom-scrollbar font-normal"
                 />
-                <div className="flex justify-between items-center px-1 text-[12px] text-neutral-400">
+                <div className="flex justify-between items-center px-1 text-[12px] text-[#15263c]/50 font-mono">
                   <span>
                     {job.text.trim().length >= 20 ? (
                       <span className="text-emerald-700 font-medium">✓ Ready ({job.text.length} chars)</span>
@@ -297,7 +297,7 @@ export const BestFitView: React.FC = () => {
           type="button"
           onClick={handleSubmit}
           disabled={isLoading}
-          className="text-[15px] font-medium py-3.5 px-10 rounded-2xl transition-all duration-300 flex items-center gap-2.5 bg-[#1d1d1f] text-white cursor-pointer hover:bg-neutral-800 active:scale-[0.98] shadow-sm disabled:opacity-50"
+          className="text-[14.5px] font-medium py-3.5 px-10 rounded-full transition-all duration-200 flex items-center gap-2.5 bg-[#15263c] text-[#fbf9f4] cursor-pointer hover:bg-[#1f3757] active:scale-[0.98] shadow-[0_4px_16px_rgba(21,38,60,0.18)] disabled:opacity-50"
         >
           {isLoading ? (
             <>

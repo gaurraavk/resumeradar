@@ -115,19 +115,18 @@ export const QualityAnalyzerView: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 w-full animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-[#15263c]/08">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-semibold tracking-wider uppercase text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100">
-              Module 3
+            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
+              AUDIT // STRUCTURAL & LINGUISTIC QUALITY
             </span>
-            <span className="text-neutral-400 text-[12px]">·</span>
-            <span className="text-[12px] text-neutral-500 font-medium">Deterministic Resume Audit</span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#1d1d1f]">
-            Resume Quality Analyzer
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#15263c]">
+            Resume Quality Inspection
           </h1>
-          <p className="text-[14px] text-neutral-500 mt-1 max-w-2xl">
+          <p className="text-[14.5px] text-[#15263c]/75 mt-1 max-w-2xl font-normal leading-relaxed">
             Evaluate structure, action verbs, measurable metrics, length estimation, and section completeness without any AI hallucination.
           </p>
         </div>
@@ -139,7 +138,7 @@ export const QualityAnalyzerView: React.FC = () => {
               setResumeText(SAMPLE_MEDIOCRE_RESUME);
               setError(null);
             }}
-            className="text-[12px] font-medium text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+            className="text-[12.5px] font-medium text-[#7a392b] bg-[#f2b6a7]/25 hover:bg-[#f2b6a7]/40 border border-[#f2b6a7]/50 px-3.5 py-1.5 rounded-full transition-all cursor-pointer backdrop-blur-md active:scale-[0.98]"
           >
             Load Mediocre Sample
           </button>
@@ -149,7 +148,7 @@ export const QualityAnalyzerView: React.FC = () => {
               setResumeText(SAMPLE_STRONG_RESUME);
               setError(null);
             }}
-            className="text-[12px] font-medium text-emerald-700 hover:text-emerald-800 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+            className="text-[12.5px] font-medium text-[#2c5350] bg-[#9ec9c4]/25 hover:bg-[#9ec9c4]/45 border border-[#9ec9c4]/50 px-3.5 py-1.5 rounded-full transition-all cursor-pointer backdrop-blur-md active:scale-[0.98]"
           >
             Load Strong Sample
           </button>
@@ -157,8 +156,8 @@ export const QualityAnalyzerView: React.FC = () => {
       </div>
 
       {/* Input Card */}
-      <div className="macos-card rounded-3xl p-6 sm:p-8 mb-8 border border-black/[0.06] shadow-xs">
-        <label htmlFor="quality-textarea" className="block text-[13px] font-semibold text-[#1d1d1f] mb-2">
+      <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8">
+        <label htmlFor="quality-textarea" className="block text-[13.5px] font-bold text-[#15263c] mb-2">
           Paste Resume Text for Quality Audit
         </label>
         <textarea
@@ -167,19 +166,19 @@ export const QualityAnalyzerView: React.FC = () => {
           onChange={(e) => setResumeText(e.target.value)}
           placeholder="Paste full resume text here to evaluate bullet points, verbs, structure, and metrics..."
           rows={9}
-          className="w-full text-[13px] text-[#1d1d1f] bg-[#fafafa] border border-black/[0.08] rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all resize-y placeholder:text-neutral-400 font-mono"
+          className="w-full text-[13px] glass-input rounded-2xl p-4 transition-all resize-y custom-scrollbar font-normal"
         />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
-          <span className="text-[12px] text-neutral-400">
-            {resumeText.length} characters · {resumeText.trim().split(/\s+/).filter(Boolean).length} words
+          <span className="text-[12px] font-mono text-[#15263c]/50">
+            {resumeText.length} CHARACTERS · {resumeText.trim().split(/\s+/).filter(Boolean).length} WORDS
           </span>
 
           <button
             type="button"
             onClick={handleAnalyze}
             disabled={isLoading || !resumeText.trim()}
-            className="inline-flex items-center justify-center gap-2 bg-[#1d1d1f] text-white px-6 py-2.5 rounded-2xl text-[13px] font-medium hover:bg-neutral-800 transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm active:scale-[0.98]"
+            className="inline-flex items-center justify-center gap-2 bg-[#15263c] text-[#fbf9f4] px-7 py-3 rounded-full text-[13.5px] font-medium hover:bg-[#1f3757] transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(21,38,60,0.18)] active:scale-[0.98]"
           >
             {isLoading ? (
               <>

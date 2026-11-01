@@ -92,16 +92,16 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   return (
     <div className="w-full max-w-6xl mx-auto px-6 md:px-12 py-10 flex flex-col gap-6 animate-entrance">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-lg bg-[#1d1d1f] text-white text-[10px] font-semibold tracking-wide shadow-2xs">
-              ADMIN
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
+              ADMIN // ENGINE OVERSIGHT & METRICS
             </span>
-            <span className="text-[13px] text-neutral-500 font-medium">{adminUser.role}</span>
-            <span className="text-[13px] text-neutral-400">({adminUser.email})</span>
+            <span className="font-mono text-[11px] text-[#15263c]/50">({adminUser.email})</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] tracking-tight mt-1">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
             Platform Analytics & Control
           </h1>
         </div>
@@ -110,7 +110,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           <button
             onClick={fetchData}
             disabled={loading}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-[#1d1d1f] bg-white hover:bg-[#f5f5f7] border border-black/[0.06] px-3.5 py-2.5 rounded-2xl shadow-2xs transition-all duration-300 cursor-pointer active:scale-[0.98] disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full shadow-2xs backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-50"
           >
             <span className={`material-symbols-outlined text-[16px] ${loading ? 'animate-spin' : ''}`}>
               refresh
@@ -119,14 +119,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           </button>
           <button
             onClick={onNavigateToApp}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-[#1d1d1f] bg-white hover:bg-[#f5f5f7] border border-black/[0.06] px-4 py-2.5 rounded-2xl shadow-2xs transition-all duration-300 cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-[#15263c] bg-white/70 hover:bg-white border border-[#15263c]/12 px-4 py-2 rounded-full shadow-2xs backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-[15px]">visibility</span>
             <span>View Scanner</span>
           </button>
           <button
             onClick={onLogout}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-rose-700 bg-rose-50 hover:bg-rose-100/80 px-4 py-2.5 rounded-2xl border border-rose-200/50 transition-all duration-300 cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-rose-700 bg-rose-50 hover:bg-rose-100/80 px-4 py-2 rounded-full border border-rose-200/50 transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-[15px]">logout</span>
             <span>Sign Out</span>
@@ -135,49 +135,45 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04] w-fit">
+      <div className="flex flex-wrap gap-1 bg-white/45 backdrop-blur-md p-1.5 rounded-full border border-[#15263c]/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] w-fit">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-            activeTab === 'overview'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
-          }`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${activeTab === 'overview'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
+            }`}
         >
           <span className="material-symbols-outlined text-[15px]">analytics</span>
           Overview
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-            activeTab === 'users'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
-          }`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${activeTab === 'users'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
+            }`}
         >
           <span className="material-symbols-outlined text-[15px]">group</span>
           Users ({users.length})
         </button>
         <button
           onClick={() => setActiveTab('activity')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-            activeTab === 'activity'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
-          }`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${activeTab === 'activity'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
+            }`}
         >
           <span className="material-symbols-outlined text-[15px]">history</span>
           Recent Activity
         </button>
         <button
           onClick={() => setActiveTab('system')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-            activeTab === 'system'
-              ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-              : 'text-neutral-500 hover:text-[#1d1d1f]'
-          }`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${activeTab === 'system'
+              ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+              : 'text-[#15263c]/70 hover:text-[#15263c]'
+            }`}
         >
-          <span className="material-symbols-outlined text-[15px]">memory</span>
+          <span className="material-symbols-outlined text-[15px]">settings</span>
           System & Engine
         </button>
       </div>
@@ -438,11 +434,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                       <td className="py-3.5 px-4 font-semibold text-[#1d1d1f]">{u.fullName}</td>
                       <td className="py-3.5 px-4 text-neutral-600">{u.email}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wide ${
-                          u.role === 'ADMIN'
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wide ${u.role === 'ADMIN'
                             ? 'bg-[#1d1d1f] text-white'
                             : 'bg-blue-50 text-blue-700 border border-blue-200/50'
-                        }`}>
+                          }`}>
                           {u.role}
                         </span>
                       </td>

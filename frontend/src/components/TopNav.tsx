@@ -35,228 +35,221 @@ export const TopNav: React.FC<TopNavProps> = ({
     setIsMobileMenuOpen(false);
   };
 
+  const navItems = [
+    { id: 'landing', label: 'Overview' },
+    { id: 'new-analysis', label: 'ATS Scan', match: ['new-analysis', 'analysis-result'] },
+    { id: 'best-fit', label: 'Best Fit' },
+    { id: 'compare-versions', label: 'Compare' },
+    { id: 'quality-analyzer', label: 'Quality' },
+  ];
+
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 flex items-center justify-between w-full px-4 sm:px-8 md:px-12 h-14 transition-all duration-300 ${
-          isScrolled ? 'macos-glass-scrolled' : 'macos-glass'
+        className={`sticky top-0 z-50 flex items-center justify-between w-full px-4 sm:px-8 md:px-12 h-16 transition-all duration-300 ${
+          isScrolled ? 'glass-nav-scrolled' : 'glass-nav'
         }`}
       >
-        <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+        <div className="flex items-center gap-6 md:gap-10">
+          {/* Brand Logo */}
           <button
             onClick={() => handleNavClick('landing')}
-            className="flex items-center gap-2 font-semibold text-base text-[#1d1d1f] tracking-tight hover:opacity-80 transition-opacity duration-300 cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-2.5 text-[#15263c] hover:opacity-85 transition-opacity duration-200 cursor-pointer active:scale-[0.98] group"
             aria-label="ResumeRadar Home"
           >
-            <span className="w-6 h-6 rounded-lg bg-[#1d1d1f] text-white flex items-center justify-center text-[10px] font-semibold tracking-tight shadow-sm">
-              RR
-            </span>
-            <span className="font-semibold tracking-tight">ResumeRadar</span>
+            <div className="w-8 h-8 rounded-xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center font-mono text-[11px] font-bold shadow-[0_2px_10px_rgba(21,38,60,0.2)] relative overflow-hidden">
+              <span className="relative z-10">RR</span>
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#15d6e6]/30 via-transparent to-[#f2b6a7]/20 pointer-events-none" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-bold text-[15px] tracking-tight leading-none text-[#15263c]">
+                ResumeRadar
+              </span>
+              <span className="font-mono text-[9px] uppercase tracking-wider text-[#15263c]/50 mt-0.5">
+                ATS · Engineering
+              </span>
+            </div>
           </button>
 
-        <div className="hidden md:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
+          {/* Editorial Nav Links */}
+          <div className="hidden md:flex items-center gap-1 bg-white/45 backdrop-blur-md p-1 rounded-full border border-[#15263c]/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+            {navItems.map((item) => {
+              const isActive = item.match
+                ? item.match.includes(currentTab)
+                : currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`text-[13px] font-medium px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer active:scale-[0.97] ${
+                    isActive
+                      ? 'text-[#fbf9f4] bg-[#15263c] shadow-[0_2px_8px_rgba(21,38,60,0.18)]'
+                      : 'text-[#15263c]/70 hover:text-[#15263c] hover:bg-black/[0.04]'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right CTA Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={() => onNavigate('landing')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-              currentTab === 'landing'
-                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            onClick={() => onNavigate('new-analysis')}
+            className="hidden sm:inline-flex items-center gap-1.5 bg-[#15263c] text-[#fbf9f4] text-[13px] font-medium px-4 py-2 rounded-full hover:bg-[#1f3757] transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-[0_4px_16px_rgba(21,38,60,0.18)] border border-[#15263c]/20"
+          >
+            <span className="material-symbols-outlined text-[15px]">add</span>
+            <span>New Scan</span>
+          </button>
+
+          {/* User Auth Section */}
+          {currentUser ? (
+            <div className="flex items-center gap-1.5 bg-white/50 backdrop-blur-md p-1 rounded-full border border-[#15263c]/10">
+              <span className="text-[12.5px] font-medium text-[#15263c] px-3 py-1 hidden lg:inline truncate max-w-[140px]">
+                {currentUser.fullName}
+              </span>
+              <button
+                onClick={() => onNavigate('history')}
+                className={`text-[12.5px] font-medium px-3 py-1 rounded-full transition-all duration-200 cursor-pointer active:scale-[0.98] flex items-center gap-1 ${
+                  currentTab === 'history'
+                    ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+                    : 'text-[#15263c]/80 hover:text-[#15263c] hover:bg-black/[0.04]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[14px]">history</span>
+                <span>History</span>
+              </button>
+              <button
+                onClick={onUserLogout}
+                className="text-[12px] font-medium text-rose-700 hover:text-rose-900 px-2.5 py-1 transition-colors duration-200 cursor-pointer active:scale-[0.98]"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onNavigate('auth')}
+              className={`text-[13px] font-medium px-4 py-2 rounded-full transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+                currentTab === 'auth'
+                  ? 'bg-[#15263c] text-[#fbf9f4] shadow-sm'
+                  : 'text-[#15263c] bg-white/60 hover:bg-white/85 border border-[#15263c]/12 shadow-2xs backdrop-blur-md'
+              }`}
+            >
+              Sign in
+            </button>
+          )}
+
+          {/* Admin Login Section */}
+          {isAdminLoggedIn ? (
+            <div className="flex items-center gap-1.5 border-l border-[#15263c]/12 pl-2">
+              <button
+                onClick={() => onNavigate('admin-dashboard')}
+                className={`text-[12.5px] font-medium px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+                  currentTab === 'admin-dashboard'
+                    ? 'bg-[#15263c] text-[#fbf9f4] shadow-sm'
+                    : 'text-[#15263c]/80 hover:bg-black/[0.04]'
+                }`}
+              >
+                Admin
+              </button>
+              <button
+                onClick={onAdminLogout}
+                className="text-[12px] font-medium text-rose-700 hover:text-rose-900 px-2 py-1 transition-colors duration-200 cursor-pointer active:scale-[0.98]"
+              >
+                Exit
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onNavigate('admin-login')}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+                currentTab === 'admin-login'
+                  ? 'bg-[#15263c] text-[#fbf9f4]'
+                  : 'text-[#15263c]/50 hover:text-[#15263c] hover:bg-black/[0.04]'
+              }`}
+              title="Admin Login"
+            >
+              <span className="material-symbols-outlined text-[16px]">shield_person</span>
+            </button>
+          )}
+
+          {/* Mobile menu hamburger */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="flex md:hidden items-center justify-center w-9 h-9 rounded-full bg-white/60 border border-[#15263c]/12 text-[#15263c] hover:bg-white/90 transition-colors cursor-pointer"
+            aria-label="Toggle navigation menu"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {isMobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Drawer */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed top-16 left-0 right-0 z-40 bg-[#fbf9f4]/95 backdrop-blur-2xl border-b border-[#15263c]/10 px-6 py-5 shadow-2xl flex flex-col gap-2 animate-entrance">
+          <button
+            onClick={() => handleNavClick('landing')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+              currentTab === 'landing' ? 'bg-[#15263c] text-[#fbf9f4]' : 'text-[#15263c]/80 hover:text-[#15263c]'
             }`}
           >
             Overview
           </button>
           <button
-            onClick={() => onNavigate('new-analysis')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            onClick={() => handleNavClick('new-analysis')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
               currentTab === 'new-analysis' || currentTab === 'analysis-result'
-                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+                ? 'bg-[#15263c] text-[#fbf9f4]'
+                : 'text-[#15263c]/80 hover:text-[#15263c]'
             }`}
           >
             ATS Scan
           </button>
           <button
-            onClick={() => onNavigate('best-fit')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-              currentTab === 'best-fit'
-                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+            onClick={() => handleNavClick('best-fit')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+              currentTab === 'best-fit' ? 'bg-[#15263c] text-[#fbf9f4]' : 'text-[#15263c]/80 hover:text-[#15263c]'
             }`}
           >
             Best Fit
           </button>
           <button
-            onClick={() => onNavigate('compare-versions')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            onClick={() => handleNavClick('compare-versions')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
               currentTab === 'compare-versions'
-                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+                ? 'bg-[#15263c] text-[#fbf9f4]'
+                : 'text-[#15263c]/80 hover:text-[#15263c]'
             }`}
           >
             Compare
           </button>
           <button
-            onClick={() => onNavigate('quality-analyzer')}
-            className={`text-[13px] font-medium px-3.5 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+            onClick={() => handleNavClick('quality-analyzer')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
               currentTab === 'quality-analyzer'
-                ? 'text-[#1d1d1f] bg-white shadow-sm border border-black/[0.04]'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+                ? 'bg-[#15263c] text-[#fbf9f4]'
+                : 'text-[#15263c]/80 hover:text-[#15263c]'
             }`}
           >
             Quality
           </button>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 sm:gap-2.5">
-        <button
-          onClick={() => onNavigate('new-analysis')}
-          className="hidden sm:inline-flex items-center gap-1.5 bg-[#1d1d1f] text-white text-[13px] font-medium px-3.5 py-1.5 rounded-2xl hover:bg-neutral-800 transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[15px]">add</span>
-          <span>New Scan</span>
-        </button>
-
-        {/* User Auth Section */}
-        {currentUser ? (
-          <div className="flex items-center gap-1.5 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
-            <span className="text-[13px] font-medium text-[#1d1d1f] px-2.5 py-1 hidden lg:inline">
-              {currentUser.fullName}
-            </span>
+          {currentUser && (
             <button
-              onClick={() => onNavigate('history')}
-              className={`text-[13px] font-medium px-3 py-1 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] flex items-center gap-1 ${
-                currentTab === 'history'
-                  ? 'bg-white text-[#1d1d1f] shadow-xs border border-black/[0.04]'
-                  : 'text-neutral-600 hover:text-[#1d1d1f]'
+              onClick={() => handleNavClick('history')}
+              className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer flex items-center gap-2 ${
+                currentTab === 'history' ? 'bg-[#15263c] text-[#fbf9f4]' : 'text-[#15263c]/80 hover:text-[#15263c]'
               }`}
             >
-              <span className="material-symbols-outlined text-[15px]">history</span>
+              <span className="material-symbols-outlined text-[16px]">history</span>
               <span>My History</span>
             </button>
-            <button
-              onClick={onUserLogout}
-              className="text-[13px] font-medium text-rose-600 hover:text-rose-700 px-2 py-1 transition-colors duration-300 cursor-pointer active:scale-[0.98]"
-            >
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => onNavigate('auth')}
-            className={`text-[13px] font-medium px-3.5 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-              currentTab === 'auth'
-                ? 'bg-[#1d1d1f] text-white shadow-sm'
-                : 'text-[#1d1d1f] bg-black/[0.04] hover:bg-black/[0.08]'
-            }`}
-          >
-            Sign in
-          </button>
-        )}
-
-        {/* Admin Login Section */}
-        {isAdminLoggedIn ? (
-          <div className="flex items-center gap-1.5 border-l border-black/[0.08] pl-2">
-            <button
-              onClick={() => onNavigate('admin-dashboard')}
-              className={`text-[13px] font-medium px-3 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-                currentTab === 'admin-dashboard'
-                  ? 'bg-[#1d1d1f] text-white shadow-sm'
-                  : 'text-neutral-600 hover:bg-black/[0.04]'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              onClick={onAdminLogout}
-              className="text-[13px] font-medium text-rose-600 hover:text-rose-700 px-2 py-1 transition-colors duration-300 cursor-pointer active:scale-[0.98]"
-            >
-              Exit
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => onNavigate('admin-login')}
-            className={`flex items-center gap-1 text-[13px] font-medium px-2.5 py-1.5 rounded-xl transition-all duration-300 cursor-pointer active:scale-[0.98] ${
-              currentTab === 'admin-login'
-                ? 'bg-[#1d1d1f] text-white shadow-sm'
-                : 'text-neutral-400 hover:text-[#1d1d1f]'
-            }`}
-            title="Admin Login"
-          >
-            <span className="material-symbols-outlined text-[15px]">shield_person</span>
-          </button>
-        )}
-
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex md:hidden items-center justify-center w-8 h-8 rounded-xl bg-black/[0.04] text-[#1d1d1f] hover:bg-black/[0.08] transition-colors cursor-pointer"
-          aria-label="Toggle navigation menu"
-        >
-          <span className="material-symbols-outlined text-[18px]">
-            {isMobileMenuOpen ? 'close' : 'menu'}
-          </span>
-        </button>
-      </div>
-    </nav>
-
-    {/* Mobile Navigation Drawer */}
-    {isMobileMenuOpen && (
-      <div className="md:hidden fixed top-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-b border-black/[0.08] px-5 py-4 shadow-xl flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200">
-        <button
-          onClick={() => handleNavClick('landing')}
-          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
-            currentTab === 'landing' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-          }`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => handleNavClick('new-analysis')}
-          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
-            currentTab === 'new-analysis' || currentTab === 'analysis-result' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-          }`}
-        >
-          ATS Scan
-        </button>
-        <button
-          onClick={() => handleNavClick('best-fit')}
-          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
-            currentTab === 'best-fit' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-          }`}
-        >
-          Best Fit
-        </button>
-        <button
-          onClick={() => handleNavClick('compare-versions')}
-          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
-            currentTab === 'compare-versions' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-          }`}
-        >
-          Compare
-        </button>
-        <button
-          onClick={() => handleNavClick('quality-analyzer')}
-          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
-            currentTab === 'quality-analyzer' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-          }`}
-        >
-          Quality
-        </button>
-        {currentUser && (
-          <button
-            onClick={() => handleNavClick('history')}
-            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer flex items-center gap-2 ${
-              currentTab === 'history' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">history</span>
-            <span>My History</span>
-          </button>
-        )}
-      </div>
-    )}
-  </>
+          )}
+        </div>
+      )}
+    </>
   );
 };

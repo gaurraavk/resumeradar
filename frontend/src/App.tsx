@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ShaderBackground } from './components/ShaderBackground';
 import { TopNav } from './components/TopNav';
 import { LandingView } from './components/LandingView';
 import { NewAnalysisView } from './components/NewAnalysisView';
@@ -240,7 +241,8 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#1d1d1f] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#fbf9f4] text-[#15263c] antialiased selection:bg-[#15263c] selection:text-[#fbf9f4] relative">
+      <ShaderBackground />
       <TopNav
         currentTab={currentTab}
         onNavigate={handleNavigate}
@@ -250,7 +252,7 @@ export function App() {
         onUserLogout={handleUserLogout}
       />
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col relative z-10">
         {analysisError && (
           <div className="max-w-4xl mx-auto mt-4 px-6 w-full">
             <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-[13px] flex items-center justify-between">

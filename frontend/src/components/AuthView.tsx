@@ -93,18 +93,18 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
   return (
     <div className="w-full max-w-md mx-auto px-6 py-12 animate-entrance">
-      <div className="macos-card p-8 rounded-3xl space-y-6 shadow-sm border border-black/[0.06]">
+      <div className="glass-card p-8 sm:p-10 rounded-3xl space-y-6 shadow-[0_16px_48px_rgba(21,38,60,0.08)]">
         {/* Header */}
-        <div className="text-center space-y-1.5">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 mb-2">
-            <span className="material-symbols-outlined text-[24px]">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#15263c] text-[#fbf9f4] mb-2 shadow-xs">
+            <span className="material-symbols-outlined text-[22px]">
               {mode === 'login' ? 'lock_open' : 'person_add'}
             </span>
           </div>
-          <h2 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">
+          <h2 className="text-2xl font-bold text-[#15263c] tracking-tight">
             {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
           </h2>
-          <p className="text-[13px] text-neutral-500 font-normal">
+          <p className="text-[13.5px] text-[#15263c]/70 font-normal">
             {mode === 'login'
               ? 'Sign in to access your saved resume scan history'
               : 'Save your ATS match history and unlock candidate insights'}
@@ -112,17 +112,17 @@ export const AuthView: React.FC<AuthViewProps> = ({
         </div>
 
         {/* Toggle Pills */}
-        <div className="flex p-1 bg-black/[0.04] rounded-2xl border border-black/[0.04]">
+        <div className="flex p-1 bg-white/45 backdrop-blur-md rounded-full border border-[#15263c]/10">
           <button
             type="button"
             onClick={() => {
               setMode('login');
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 text-[13px] font-medium rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`flex-1 py-2 text-[13px] font-medium rounded-full transition-all duration-200 cursor-pointer ${
               mode === 'login'
-                ? 'bg-white text-[#1d1d1f] shadow-xs'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+                ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+                : 'text-[#15263c]/70 hover:text-[#15263c]'
             }`}
           >
             Sign in
@@ -133,10 +133,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
               setMode('register');
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 text-[13px] font-medium rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`flex-1 py-2 text-[13px] font-medium rounded-full transition-all duration-200 cursor-pointer ${
               mode === 'register'
-                ? 'bg-white text-[#1d1d1f] shadow-xs'
-                : 'text-neutral-500 hover:text-[#1d1d1f]'
+                ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
+                : 'text-[#15263c]/70 hover:text-[#15263c]'
             }`}
           >
             Create account
@@ -155,7 +155,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div className="space-y-1.5">
-              <label className="text-[12px] font-semibold text-neutral-600 tracking-wide uppercase">
+              <label className="text-[11px] font-mono uppercase tracking-wider text-[#15263c]/60 block font-bold">
                 Full Name
               </label>
               <input
@@ -165,13 +165,13 @@ export const AuthView: React.FC<AuthViewProps> = ({
                 placeholder="e.g. Jane Doe"
                 autoComplete="name"
                 required
-                className="w-full px-4 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-2xl glass-input text-[14px]"
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[12px] font-semibold text-neutral-600 tracking-wide uppercase">
+            <label className="text-[11px] font-mono uppercase tracking-wider text-[#15263c]/60 block font-bold">
               Email Address
             </label>
             <input
@@ -181,12 +181,12 @@ export const AuthView: React.FC<AuthViewProps> = ({
               placeholder="you@example.com"
               autoComplete="email"
               required
-              className="w-full px-4 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+              className="w-full px-4 py-2.5 rounded-2xl glass-input text-[14px]"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[12px] font-semibold text-neutral-600 tracking-wide uppercase">
+            <label className="text-[11px] font-mono uppercase tracking-wider text-[#15263c]/60 block font-bold">
               Password
             </label>
             <div className="relative flex items-center">
@@ -197,14 +197,14 @@ export const AuthView: React.FC<AuthViewProps> = ({
                 placeholder={mode === 'register' ? 'Minimum 8 characters' : 'Your password'}
                 autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                 required
-                className="w-full pl-4 pr-11 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full pl-4 pr-11 py-2.5 rounded-2xl glass-input text-[14px]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 text-neutral-400 hover:text-neutral-600 cursor-pointer p-1 rounded-lg focus:outline-none"
+                className="absolute right-3 text-[#15263c]/50 hover:text-[#15263c] cursor-pointer p-1 rounded-lg focus:outline-none"
               >
                 <span className="material-symbols-outlined text-[18px]">
                   {showPassword ? 'visibility_off' : 'visibility'}
@@ -217,7 +217,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
             type="submit"
             disabled={loading}
             aria-busy={loading}
-            className={`w-full mt-2 py-3 rounded-2xl bg-[#1d1d1f] text-white text-[14px] font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+            className={`w-full mt-2 py-3 rounded-full bg-[#15263c] text-[#fbf9f4] text-[14px] font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(21,38,60,0.18)] ${
               loading
                 ? 'opacity-60 cursor-not-allowed'
                 : 'hover:bg-black cursor-pointer active:scale-[0.99]'
