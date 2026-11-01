@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --font-editorial: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Inter, system-ui, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, monospace;
   --color-canvas: #fbf9f4;
   --color-canvas-dim: #f7f5f0;
   --color-midnight: #15263c;
@@ -22,19 +22,22 @@
     min-height: 100%;
     background-color: var(--color-canvas);
     color: var(--color-midnight);
-    font-family: var(--font-editorial);
-    letter-spacing: -0.01em;
+    font-family: var(--font-apple);
+    letter-spacing: -0.012em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4 {
-    letter-spacing: -0.025em;
-    font-family: var(--font-editorial);
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.024em;
+    font-family: var(--font-apple);
+    font-weight: 600;
   }
 
   code, pre, .font-mono {
     font-family: var(--font-mono);
+    letter-spacing: -0.005em;
   }
 }
 

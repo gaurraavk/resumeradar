@@ -95,11 +95,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
-            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
-              ADMIN // ENGINE OVERSIGHT & METRICS
-            </span>
-            <span className="font-mono text-[11px] text-[#15263c]/50">({adminUser.email})</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="text-[12px] text-[#15263c]/60 font-medium">Administrator ({adminUser.email})</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
             Platform Analytics & Control

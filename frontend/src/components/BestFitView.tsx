@@ -132,16 +132,10 @@ export const BestFitView: React.FC = () => {
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#15d6e6] animate-pulse"></span>
-            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
-              BENCHMARK // MULTI-ROLE MATCH
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
             Best Fit Role Ranking
           </h1>
-          <p className="text-[14.5px] text-[#15263c]/75 mt-1 font-normal leading-relaxed">
+          <p className="text-[14.5px] text-[#15263c]/75 mt-1.5 font-normal leading-relaxed">
             Cross-reference one resume against multiple job descriptions to find your strongest ATS match.
           </p>
         </div>

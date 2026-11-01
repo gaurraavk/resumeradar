@@ -133,16 +133,10 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
       {/* View Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b border-[#15263c]/08">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <DotMatrix rows={2} cols={3} />
-            <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold">
-              SCANNER // INPUT CONSOLE
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#15263c] tracking-tight">
             ATS Match & Optimization Scan
           </h1>
-          <p className="text-[14.5px] text-[#15263c]/75 mt-1 font-normal max-w-2xl">
+          <p className="text-[14.5px] text-[#15263c]/75 mt-1.5 font-normal max-w-2xl leading-relaxed">
             Supply your resume and target job requirements to generate deterministic keyword alignment, formatting audit, and auto-fixed documents.
           </p>
         </div>
@@ -152,24 +146,19 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
         </GlassBadge>
       </div>
 
-      {/* Main 2-Column Workbench */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      {/* Main 2-Column Workbench with perfectly matched box heights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         {/* LEFT COLUMN: Resume Input */}
-        <GlassCard className="flex flex-col gap-6" dotMatrix>
+        <GlassCard className="flex flex-col h-full justify-between gap-6" dotMatrix={false}>
           <div className="flex items-center justify-between pb-3 border-b border-[#15263c]/08">
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono text-[11px] font-bold text-[#15263c] bg-white/70 px-2.5 py-1 rounded-lg border border-[#15263c]/10">
-                INPUT 01
-              </span>
-              <h2 className="text-lg font-bold text-[#15263c]">Your Resume</h2>
-            </div>
+            <h2 className="text-lg font-bold text-[#15263c]">Your Resume</h2>
 
             {/* Mode Switcher */}
             <div className="flex items-center gap-1 bg-black/[0.04] p-1 rounded-full border border-black/[0.04]">
               <button
                 type="button"
                 onClick={() => setActiveResumeInputMode('upload')}
-                className={`text-[12px] font-medium px-3 py-1 rounded-full transition-all cursor-pointer ${
+                className={`text-[12px] font-medium px-3.5 py-1 rounded-full transition-all cursor-pointer ${
                   activeResumeInputMode === 'upload'
                     ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
                     : 'text-[#15263c]/70 hover:text-[#15263c]'
@@ -180,7 +169,7 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveResumeInputMode('text')}
-                className={`text-[12px] font-medium px-3 py-1 rounded-full transition-all cursor-pointer ${
+                className={`text-[12px] font-medium px-3.5 py-1 rounded-full transition-all cursor-pointer ${
                   activeResumeInputMode === 'text'
                     ? 'bg-[#15263c] text-[#fbf9f4] shadow-xs'
                     : 'text-[#15263c]/70 hover:text-[#15263c]'
@@ -191,113 +180,109 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
             </div>
           </div>
 
-          {activeResumeInputMode === 'upload' ? (
-            <div className="space-y-4">
-              {uploadedFile || resumeFile ? (
-                /* Selected File Card */
-                <div className="p-5 rounded-2xl bg-white/70 border border-[#15263c]/12 shadow-sm flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center shrink-0 shadow-xs">
-                      <span className="material-symbols-outlined text-[24px]">description</span>
+          <div className="flex-1 flex flex-col justify-center">
+            {activeResumeInputMode === 'upload' ? (
+              <div className="flex-1 flex flex-col justify-center">
+                {uploadedFile || resumeFile ? (
+                  /* Selected File Card */
+                  <div className="p-6 rounded-2xl bg-white/70 border border-[#15263c]/12 shadow-sm flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-12 h-12 rounded-2xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center shrink-0 shadow-xs">
+                        <span className="material-symbols-outlined text-[24px]">description</span>
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[14px] font-bold text-[#15263c] truncate block">
+                          {uploadedFile?.name || resumeFile?.fileName}
+                        </span>
+                        <span className="font-mono text-[11px] text-[#15263c]/60 mt-0.5 block">
+                          {uploadedFile
+                            ? `${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB`
+                            : resumeFile?.fileSize} · READY FOR ATS AUDIT
+                        </span>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-[14px] font-bold text-[#15263c] truncate block">
-                        {uploadedFile?.name || resumeFile?.fileName}
-                      </span>
-                      <span className="font-mono text-[11px] text-[#15263c]/60 mt-0.5 block">
-                        {uploadedFile
-                          ? `${(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB`
-                          : resumeFile?.fileSize} · READY FOR ATS AUDIT
-                      </span>
-                    </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={handleResetFile}
-                    className="p-2 rounded-xl text-[#15263c]/60 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
-                    title="Remove file"
+                    <button
+                      type="button"
+                      onClick={handleResetFile}
+                      className="p-2 rounded-xl text-[#15263c]/60 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Remove file"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* Drag & Drop Upload Zone */
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(true);
+                    }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center gap-3.5 flex-1 min-h-[350px] ${
+                      isDragOver
+                        ? 'border-[#15d6e6] bg-[#15d6e6]/10 scale-[1.01]'
+                        : 'border-[#15263c]/15 hover:border-[#15263c]/35 bg-white/35 hover:bg-white/55'
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-[20px]">close</span>
-                  </button>
-                </div>
-              ) : (
-                /* Drag & Drop Upload Zone */
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragOver(true);
-                  }}
-                  onDragLeave={() => setIsDragOver(false)}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center gap-3 ${
-                    isDragOver
-                      ? 'border-[#15d6e6] bg-[#15d6e6]/10 scale-[1.01]'
-                      : 'border-[#15263c]/15 hover:border-[#15263c]/35 bg-white/35 hover:bg-white/55'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".docx,.pdf,.txt"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <div className="w-14 h-14 rounded-2xl bg-white/70 text-[#15263c] flex items-center justify-center shadow-xs border border-[#15263c]/10">
-                    <span className="material-symbols-outlined text-[28px]">cloud_upload</span>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".docx,.pdf,.txt"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <div className="w-14 h-14 rounded-2xl bg-white/70 text-[#15263c] flex items-center justify-center shadow-xs border border-[#15263c]/10">
+                      <span className="material-symbols-outlined text-[28px]">cloud_upload</span>
+                    </div>
+                    <div>
+                      <strong className="text-[15px] font-bold text-[#15263c] block">
+                        Click to browse or drag & drop your resume
+                      </strong>
+                      <span className="text-[13px] text-[#15263c]/60 block mt-1">
+                        Supports Word (.docx), PDF (.pdf), and Plain Text (.txt) up to 10 MB
+                      </span>
+                    </div>
+                    <GlassBadge variant="neutral" size="sm">
+                      In-Memory Parse · Zero File Storage
+                    </GlassBadge>
                   </div>
-                  <div>
-                    <strong className="text-[15px] font-bold text-[#15263c] block">
-                      Click to browse or drag & drop your resume
-                    </strong>
-                    <span className="text-[13px] text-[#15263c]/60 block mt-1">
-                      Supports Word (.docx), PDF (.pdf), and Plain Text (.txt) up to 10 MB
-                    </span>
-                  </div>
-                  <GlassBadge variant="neutral" size="sm">
-                    In-Memory Parse · Zero File Storage
-                  </GlassBadge>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* Paste Text Mode */
-            <div className="space-y-2">
-              <label className="text-[12.5px] font-semibold text-[#15263c]/80 block">
-                Paste Resume Text Content
-              </label>
-              <textarea
-                value={manualResumeText}
-                onChange={(e) => setManualResumeText(e.target.value)}
-                placeholder="Paste the full text of your resume here (experience, skills, summary, education)..."
-                rows={11}
-                className="w-full glass-input rounded-2xl p-4 text-[13.5px] leading-relaxed custom-scrollbar"
-              />
-              <div className="flex justify-between items-center text-[11.5px] font-mono text-[#15263c]/60 px-1">
-                <span>{manualResumeText.length} CHARACTERS</span>
-                <span>{manualResumeText.length >= 50 ? '✓ READY' : 'MIN 50 CHARS'}</span>
+                )}
               </div>
-            </div>
-          )}
+            ) : (
+              /* Paste Text Mode */
+              <div className="flex-1 flex flex-col gap-2">
+                <label className="text-[12.5px] font-semibold text-[#15263c]/80 block">
+                  Paste Resume Text Content
+                </label>
+                <textarea
+                  value={manualResumeText}
+                  onChange={(e) => setManualResumeText(e.target.value)}
+                  placeholder="Paste the full text of your resume here (experience, skills, summary, education)..."
+                  className="w-full flex-1 min-h-[310px] glass-input rounded-2xl p-4 text-[13.5px] leading-relaxed custom-scrollbar resize-none"
+                />
+                <div className="flex justify-between items-center text-[11.5px] font-mono text-[#15263c]/60 px-1">
+                  <span>{manualResumeText.length} CHARACTERS</span>
+                  <span>{manualResumeText.length >= 50 ? '✓ READY' : 'MIN 50 CHARS'}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </GlassCard>
 
         {/* RIGHT COLUMN: Target Job Description */}
-        <GlassCard className="flex flex-col gap-6" dotMatrix>
+        <GlassCard className="flex flex-col h-full justify-between gap-6" dotMatrix={false}>
           <div className="flex items-center justify-between pb-3 border-b border-[#15263c]/08">
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono text-[11px] font-bold text-[#15263c] bg-white/70 px-2.5 py-1 rounded-lg border border-[#15263c]/10">
-                INPUT 02
-              </span>
-              <h2 className="text-lg font-bold text-[#15263c]">Target Job Description</h2>
-            </div>
+            <h2 className="text-lg font-bold text-[#15263c]">Target Job Description</h2>
 
             <span className="font-mono text-[11px] text-[#15263c]/60">
               {charCount} / 5000
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex-1 flex flex-col gap-4">
             <div>
               <label className="text-[12.5px] font-semibold text-[#15263c]/80 block mb-1.5">
                 Target Role / Job Title (Optional)
@@ -311,17 +296,16 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
               />
             </div>
 
-            <div>
+            <div className="flex-1 flex flex-col">
               <label className="text-[12.5px] font-semibold text-[#15263c]/80 block mb-1.5">
                 Job Requirements & Responsibilities
               </label>
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
-                rows={9}
                 maxLength={5000}
                 placeholder="Paste the job description, required skills, preferred qualifications, and responsibilities..."
-                className="w-full glass-input rounded-2xl p-4 text-[13.5px] leading-relaxed custom-scrollbar"
+                className="w-full flex-1 min-h-[220px] glass-input rounded-2xl p-4 text-[13.5px] leading-relaxed custom-scrollbar resize-none"
               />
             </div>
 
@@ -341,32 +325,18 @@ export const NewAnalysisView: React.FC<NewAnalysisViewProps> = ({
         </GlassCard>
       </div>
 
-      {/* Action Submit Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-3xl bg-white/50 backdrop-blur-xl border border-white/80 shadow-[0_8px_32px_rgba(21,38,60,0.06)]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center shrink-0 shadow-xs">
-            <span className="material-symbols-outlined text-[20px]">radar</span>
-          </div>
-          <div>
-            <strong className="text-[14px] font-bold text-[#15263c] block">
-              Ready for Deterministic Execution
-            </strong>
-            <span className="text-[12.5px] text-[#15263c]/65 block font-normal">
-              Extracts keywords, audits structure, and prepares layout auto-fix.
-            </span>
-          </div>
-        </div>
-
+      {/* Action Submit Area: Just clean Analyze Match button without full banner box */}
+      <div className="flex justify-end pt-2 pb-8">
         <GlassButton
           onClick={handleSubmit}
           disabled={!isReady || isLoading}
           loading={isLoading}
           size="lg"
           variant="primary"
-          icon="auto_fix_high"
-          className="w-full sm:w-auto min-w-[220px]"
+          icon="radar"
+          className="w-full sm:w-auto min-w-[200px]"
         >
-          {isLoading ? 'Executing ATS Analysis...' : 'Analyze Match'}
+          {isLoading ? 'Analyzing Match...' : 'Analyze Match'}
         </GlassButton>
       </div>
     </div>

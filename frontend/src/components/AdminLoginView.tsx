@@ -46,9 +46,6 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
           <div className="w-12 h-12 rounded-2xl bg-[#15263c] text-[#fbf9f4] flex items-center justify-center font-mono font-bold text-base mx-auto shadow-xs">
             RR
           </div>
-          <span className="font-mono text-[10.5px] uppercase tracking-widest text-[#15263c]/60 font-bold block">
-            ADMIN // SECURE GATEWAY
-          </span>
           <h1 className="text-2xl font-extrabold text-[#15263c] tracking-tight">Admin Portal</h1>
           <p className="text-[13.5px] text-[#15263c]/70 font-normal">Sign in with your administrator credentials.</p>
         </div>
