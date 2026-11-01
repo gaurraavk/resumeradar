@@ -77,6 +77,7 @@ export interface ResumeTemplate {
   id: string;
   name: string;
   description: string;
+  layoutType?: 'SINGLE_COLUMN' | 'SIDEBAR_TWO_COLUMN' | 'BANNER_COMPACT';
   fontFamily: string;
   accentColorHex: string;
   nameAlignment: 'LEFT' | 'CENTER';

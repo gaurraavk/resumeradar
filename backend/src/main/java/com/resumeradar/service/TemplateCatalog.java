@@ -9,13 +9,53 @@ import java.util.*;
 @Service
 public class TemplateCatalog {
 
-    private static final List<String> PREFERRED_ORDER = List.of("classic", "modern", "fresher-focus", "executive");
+    private static final List<String> PREFERRED_ORDER = List.of("classic-professional", "modern-sidebar", "compact-banner");
 
     private static final List<ResumeTemplate> DEFAULT_TEMPLATES = List.of(
-            new ResumeTemplate("classic", "Classic", "Traditional serif typography with centered header and academic-first layout", "Times New Roman", "#000000", "CENTER", "UPPER", true, List.of("EDUCATION", "EXPERIENCE", "PROJECTS", "SKILLS", "CERTIFICATIONS")),
-            new ResumeTemplate("modern", "Modern", "Sleek sans-serif style with indigo accents and skills-forward hierarchy", "Calibri", "#4F46E5", "LEFT", "TITLE", false, List.of("SKILLS", "EXPERIENCE", "PROJECTS", "EDUCATION", "CERTIFICATIONS")),
-            new ResumeTemplate("fresher-focus", "Fresher Focus", "Teal accents highlighting education and projects, best for students and early career", "Arial", "#0F766E", "LEFT", "UPPER", true, List.of("EDUCATION", "PROJECTS", "SKILLS", "CERTIFICATIONS", "EXPERIENCE")),
-            new ResumeTemplate("executive", "Executive", "Distinguished navy Georgia serif emphasizing leadership and professional experience", "Georgia", "#1E3A8A", "CENTER", "UPPER", true, List.of("EXPERIENCE", "SKILLS", "EDUCATION", "PROJECTS", "CERTIFICATIONS"))
+            new ResumeTemplate(
+                    "classic-professional",
+                    "Classic Professional",
+                    "ATS-safe single column with centered header, ruled headings, and right-aligned dates",
+                    "Times New Roman",
+                    "#000000",
+                    "CENTER",
+                    "UPPER",
+                    true,
+                    List.of("SUMMARY", "EDUCATION", "EXPERIENCE", "PROJECTS", "SKILLS", "CERTIFICATIONS"),
+                    "SINGLE_COLUMN"
+            ),
+            new ResumeTemplate(
+                    "modern-sidebar",
+                    "Modern Sidebar",
+                    "Two-column layout with dark slate sidebar for contact, skills, and education",
+                    "Calibri",
+                    "#1F2937",
+                    "LEFT",
+                    "UPPER",
+                    false,
+                    List.of("SUMMARY", "EXPERIENCE", "PROJECTS", "SKILLS", "EDUCATION", "CERTIFICATIONS"),
+                    "SIDEBAR_TWO_COLUMN"
+            ),
+            new ResumeTemplate(
+                    "compact-banner",
+                    "Compact Banner",
+                    "ATS-safe single column with full-width teal banner and fresher-first hierarchy",
+                    "Arial",
+                    "#0F766E",
+                    "LEFT",
+                    "UPPER",
+                    false,
+                    List.of("EDUCATION", "EXPERIENCE", "PROJECTS", "SKILLS", "CERTIFICATIONS"),
+                    "BANNER_COMPACT"
+            )
+    );
+
+    // Fallbacks for legacy template IDs so old history records or queries resolve gracefully
+    private static final Map<String, String> LEGACY_MAPPING = Map.of(
+            "classic", "classic-professional",
+            "modern", "modern-sidebar",
+            "fresher-focus", "compact-banner",
+            "executive", "classic-professional"
     );
 
     private final ResumeTemplateRepository resumeTemplateRepository;
@@ -45,9 +85,20 @@ public class TemplateCatalog {
         if (id == null || id.isBlank()) return Optional.empty();
         String slug = id.trim().toLowerCase();
         if (resumeTemplateRepository != null) {
-            return resumeTemplateRepository.findByIdIgnoreCase(slug);
+            Optional<ResumeTemplate> found = resumeTemplateRepository.findByIdIgnoreCase(slug);
+            if (found.isPresent()) return found;
         }
-        return DEFAULT_TEMPLATES.stream().filter(t -> t.getId().equalsIgnoreCase(slug)).findFirst();
+
+        Optional<ResumeTemplate> def = DEFAULT_TEMPLATES.stream().filter(t -> t.getId().equalsIgnoreCase(slug)).findFirst();
+        if (def.isPresent()) return def;
+
+        // Fallback for legacy ID
+        if (LEGACY_MAPPING.containsKey(slug)) {
+            String mapped = LEGACY_MAPPING.get(slug);
+            return findById(mapped);
+        }
+
+        return Optional.empty();
     }
 
     public ResumeTemplate getById(String id) {

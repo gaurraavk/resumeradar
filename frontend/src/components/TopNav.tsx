@@ -19,6 +19,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   onUserLogout,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,22 +30,29 @@ export const TopNav: React.FC<TopNavProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavClick = (tab: string) => {
+    onNavigate(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <nav
-      className={`sticky top-0 z-50 flex items-center justify-between w-full px-6 sm:px-8 md:px-12 h-14 transition-all duration-300 ${
-        isScrolled ? 'macos-glass-scrolled' : 'macos-glass'
-      }`}
-    >
-      <div className="flex items-center gap-6 md:gap-8">
-        <button
-          onClick={() => onNavigate('landing')}
-          className="flex items-center gap-2.5 font-semibold text-base text-[#1d1d1f] tracking-tight hover:opacity-80 transition-opacity duration-300 cursor-pointer active:scale-[0.98]"
-        >
-          <span className="w-6 h-6 rounded-lg bg-[#1d1d1f] text-white flex items-center justify-center text-[10px] font-semibold tracking-tight shadow-sm">
-            RR
-          </span>
-          <span className="font-semibold tracking-tight">ResumeRadar</span>
-        </button>
+    <>
+      <nav
+        className={`sticky top-0 z-50 flex items-center justify-between w-full px-4 sm:px-8 md:px-12 h-14 transition-all duration-300 ${
+          isScrolled ? 'macos-glass-scrolled' : 'macos-glass'
+        }`}
+      >
+        <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+          <button
+            onClick={() => handleNavClick('landing')}
+            className="flex items-center gap-2 font-semibold text-base text-[#1d1d1f] tracking-tight hover:opacity-80 transition-opacity duration-300 cursor-pointer active:scale-[0.98]"
+            aria-label="ResumeRadar Home"
+          >
+            <span className="w-6 h-6 rounded-lg bg-[#1d1d1f] text-white flex items-center justify-center text-[10px] font-semibold tracking-tight shadow-sm">
+              RR
+            </span>
+            <span className="font-semibold tracking-tight">ResumeRadar</span>
+          </button>
 
         <div className="hidden md:flex items-center gap-1 bg-black/[0.03] p-1 rounded-2xl border border-black/[0.04]">
           <button
@@ -179,7 +187,76 @@ export const TopNav: React.FC<TopNavProps> = ({
             <span className="material-symbols-outlined text-[15px]">shield_person</span>
           </button>
         )}
+
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="flex md:hidden items-center justify-center w-8 h-8 rounded-xl bg-black/[0.04] text-[#1d1d1f] hover:bg-black/[0.08] transition-colors cursor-pointer"
+          aria-label="Toggle navigation menu"
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {isMobileMenuOpen ? 'close' : 'menu'}
+          </span>
+        </button>
       </div>
     </nav>
+
+    {/* Mobile Navigation Drawer */}
+    {isMobileMenuOpen && (
+      <div className="md:hidden fixed top-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-b border-black/[0.08] px-5 py-4 shadow-xl flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200">
+        <button
+          onClick={() => handleNavClick('landing')}
+          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+            currentTab === 'landing' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+          }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => handleNavClick('new-analysis')}
+          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+            currentTab === 'new-analysis' || currentTab === 'analysis-result' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+          }`}
+        >
+          ATS Scan
+        </button>
+        <button
+          onClick={() => handleNavClick('best-fit')}
+          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+            currentTab === 'best-fit' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+          }`}
+        >
+          Best Fit
+        </button>
+        <button
+          onClick={() => handleNavClick('compare-versions')}
+          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+            currentTab === 'compare-versions' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+          }`}
+        >
+          Compare
+        </button>
+        <button
+          onClick={() => handleNavClick('quality-analyzer')}
+          className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer ${
+            currentTab === 'quality-analyzer' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+          }`}
+        >
+          Quality
+        </button>
+        {currentUser && (
+          <button
+            onClick={() => handleNavClick('history')}
+            className={`text-left text-[14px] font-medium px-4 py-2.5 rounded-xl cursor-pointer flex items-center gap-2 ${
+              currentTab === 'history' ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-neutral-600 hover:text-[#1d1d1f]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">history</span>
+            <span>My History</span>
+          </button>
+        )}
+      </div>
+    )}
+  </>
   );
 };

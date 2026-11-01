@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 
 interface Props {
   onLoginSuccess: (user: { email: string; name: string; role: string }) => void;
@@ -22,10 +22,10 @@ export const AdminLoginView: React.FC<Props> = ({ onLoginSuccess, onCancel }) =>
       const response = await apiFetch('/api/v1/auth/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || 'Admin login failed.');
+      const result = await safeJson(response);
+      if (!response.ok || !result.success) throw new Error(result.message || 'Admin login failed.');
       localStorage.setItem('resumeradar_admin_token', result.data.token);
       onLoginSuccess({
         email: result.data.user.email,

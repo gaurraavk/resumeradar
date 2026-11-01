@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -101,12 +102,12 @@ class AnalysisControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.originalScore").isNumber())
                 .andExpect(jsonPath("$.data.improvedScore").isNumber())
                 .andExpect(jsonPath("$.data.fixesApplied").isArray())
-                .andExpect(jsonPath("$.data.downloadUrl").value("/api/v1/download/fixed-resume/" + analysisId));
+                .andExpect(jsonPath("$.data.downloadUrl", startsWith("/api/v1/download/fixed-resume/" + analysisId)));
 
         // 4. Call /api/v1/download/fixed-resume/{analysisId}
         MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", containsString("fixed_resume.docx")))
+                .andExpect(header().string("Content-Disposition", containsString("resume_original.docx")))
                 .andReturn();
 
         byte[] downloadedBytes = downloadResult.getResponse().getContentAsByteArray();
@@ -149,12 +150,12 @@ class AnalysisControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.originalScore").isNumber())
                 .andExpect(jsonPath("$.data.improvedScore").isNumber())
                 .andExpect(jsonPath("$.data.fixesApplied").isArray())
-                .andExpect(jsonPath("$.data.downloadUrl").value("/api/v1/download/fixed-resume/" + analysisId));
+                .andExpect(jsonPath("$.data.downloadUrl", startsWith("/api/v1/download/fixed-resume/" + analysisId)));
 
         // 3. Download the generated fixed resume
         MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", containsString("fixed_resume.docx")))
+                .andExpect(header().string("Content-Disposition", containsString("resume_original.docx")))
                 .andReturn();
 
         byte[] downloadedBytes = downloadResult.getResponse().getContentAsByteArray();
@@ -190,13 +191,16 @@ class AnalysisControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/templates"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data", hasSize(4)))
-                .andExpect(jsonPath("$.data[0].id").value("classic"))
+                .andExpect(jsonPath("$.data", hasSize(3)))
+                .andExpect(jsonPath("$.data[0].id").value("classic-professional"))
+                .andExpect(jsonPath("$.data[0].layoutType").value("SINGLE_COLUMN"))
                 .andExpect(jsonPath("$.data[0].fontFamily").value("Times New Roman"))
-                .andExpect(jsonPath("$.data[1].id").value("modern"))
-                .andExpect(jsonPath("$.data[1].accentColorHex").value("#4F46E5"))
-                .andExpect(jsonPath("$.data[2].id").value("fresher-focus"))
-                .andExpect(jsonPath("$.data[3].id").value("executive"));
+                .andExpect(jsonPath("$.data[1].id").value("modern-sidebar"))
+                .andExpect(jsonPath("$.data[1].layoutType").value("SIDEBAR_TWO_COLUMN"))
+                .andExpect(jsonPath("$.data[1].accentColorHex").value("#1F2937"))
+                .andExpect(jsonPath("$.data[2].id").value("compact-banner"))
+                .andExpect(jsonPath("$.data[2].layoutType").value("BANNER_COMPACT"))
+                .andExpect(jsonPath("$.data[2].accentColorHex").value("#0F766E"));
     }
 
     @Test
@@ -226,29 +230,138 @@ class AnalysisControllerIntegrationTest {
         Map<String, Object> data = (Map<String, Object>) map.get("data");
         String analysisId = (String) data.get("analysisId");
 
-        // 2. Generate with "modern" template
+        // 2. Generate with "classic-professional" template
         mockMvc.perform(post("/api/v1/generate-fixed-resume")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "analysisId", analysisId,
-                                "templateId", "modern"
+                                "templateId", "classic-professional"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.templateId").value("modern"))
-                .andExpect(jsonPath("$.data.templateName").value("Modern"))
-                .andExpect(jsonPath("$.data.fixesApplied", hasItem("Applied the 'Modern' template")));
+                .andExpect(jsonPath("$.data.templateId").value("classic-professional"))
+                .andExpect(jsonPath("$.data.templateName").value("Classic Professional"))
+                .andExpect(jsonPath("$.data.fixesApplied", hasItem("Applied the 'Classic Professional' template")));
 
-        // 3. Download and verify font is Calibri
-        MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+        // 3. Download and verify font is Times New Roman and cache-control headers
+        MvcResult downloadResult = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId)
+                        .param("templateId", "classic-professional"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", containsString("no-store")))
+                .andExpect(header().string("Content-Disposition", containsString("resume_classic-professional.docx")))
                 .andReturn();
 
         byte[] bytes = downloadResult.getResponse().getContentAsByteArray();
         try (XWPFDocument doc = new XWPFDocument(new java.io.ByteArrayInputStream(bytes))) {
             assertFalse(doc.getParagraphs().isEmpty());
-            assertEquals("Calibri", doc.getParagraphs().get(0).getRuns().get(0).getFontFamily());
+            assertEquals("Times New Roman", doc.getParagraphs().get(0).getRuns().get(0).getFontFamily());
         }
+    }
+
+    @Test
+    void testTemplateCycle_OriginalToTemplatesToOriginal() throws Exception {
+        // Complete cycle: original -> classic-professional -> modern-sidebar -> compact-banner -> original
+        AnalysisRequest request = new AnalysisRequest();
+        request.setResumeText("""
+                Alan Turing
+                alan@bletchleypark.uk | 555-0101
+                SUMMARY
+                Mathematician, cryptanalyst, and computer scientist.
+                EXPERIENCE
+                Cryptanalyst at Bletchley Park
+                - Designed Bombe machine to decipher Enigma
+                SKILLS
+                Cryptanalysis, Mathematics, Logic
+                """);
+        request.setJobDescription("Software engineer with Logic, Mathematics and Cryptanalysis");
+
+        MvcResult analyzeResult = mockMvc.perform(post("/api/v1/analyze")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Map<String, Object> map = objectMapper.readValue(analyzeResult.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> data = (Map<String, Object>) map.get("data");
+        String analysisId = (String) data.get("analysisId");
+
+        // 1. Generate Original
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "original"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.templateId").value("original"));
+
+        byte[] origBytes1 = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // 2. Generate Classic Professional
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "classic-professional"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.templateId").value("classic-professional"));
+
+        byte[] classicBytes = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // 3. Generate Modern Sidebar
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "modern-sidebar"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.templateId").value("modern-sidebar"));
+
+        byte[] sidebarBytes = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // 4. Generate Compact Banner
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "compact-banner"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.templateId").value("compact-banner"));
+
+        byte[] bannerBytes = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // 5. Generate Original again
+        mockMvc.perform(post("/api/v1/generate-fixed-resume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "analysisId", analysisId,
+                                "templateId", "original"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.templateId").value("original"));
+
+        byte[] origBytes2 = mockMvc.perform(get("/api/v1/download/fixed-resume/" + analysisId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
+
+        // Verify byte differences between templates
+        assertFalse(Arrays.equals(origBytes1, classicBytes), "Original and Classic bytes should differ");
+        assertFalse(Arrays.equals(classicBytes, sidebarBytes), "Classic and Sidebar bytes should differ");
+        assertFalse(Arrays.equals(sidebarBytes, bannerBytes), "Sidebar and Banner bytes should differ");
+
+        // Verify original layout restored identically
+        assertEquals(origBytes1.length, origBytes2.length, "Restored original docx should match initial original length");
     }
 
     @Test

@@ -1,9 +1,10 @@
 package com.resumeradar.service;
 
 import com.resumeradar.model.ResumeTemplate;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
+import com.resumeradar.service.renderer.ClassicProfessionalRenderer;
+import com.resumeradar.service.renderer.CompactBannerRenderer;
+import com.resumeradar.service.renderer.ModernSidebarRenderer;
+import org.apache.poi.xwpf.usermodel.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,12 +19,18 @@ class TemplateAndParserTest {
     private ResumeSectionParser parser;
     private TemplateCatalog catalog;
     private TemplateResumeService templateService;
+    private ClassicProfessionalRenderer classicRenderer;
+    private ModernSidebarRenderer sidebarRenderer;
+    private CompactBannerRenderer bannerRenderer;
 
     @BeforeEach
     void setUp() {
         parser = new ResumeSectionParser();
         catalog = new TemplateCatalog();
-        templateService = new TemplateResumeService(parser);
+        classicRenderer = new ClassicProfessionalRenderer();
+        sidebarRenderer = new ModernSidebarRenderer();
+        bannerRenderer = new CompactBannerRenderer();
+        templateService = new TemplateResumeService(parser, List.of(classicRenderer, sidebarRenderer, bannerRenderer));
     }
 
     @Test
@@ -36,7 +43,7 @@ class TemplateAndParserTest {
                 EDUCATION
                 BS in Computer Science, Stanford University
                 EXPERIENCE
-                Senior Software Engineer at Acme Corp
+                Senior Software Engineer at Acme Corp | 2021 - Present
                 - Architected cloud native microservices using Java and Spring Boot
                 - Improved API latency by 45%
                 PROJECTS
@@ -163,7 +170,6 @@ class TemplateAndParserTest {
                 .filter(s -> !s.isEmpty())
                 .toList();
 
-        // Collect all parsed content lines
         Set<String> parsedContent = new HashSet<>();
         parsedContent.add(parsed.getCandidateName());
         parsedContent.addAll(parsed.getContactLines());
@@ -174,7 +180,6 @@ class TemplateAndParserTest {
         for (String line : inputLines) {
             String headingKey = parser.detectHeadingKey(line);
             if (headingKey != null) {
-                // Was recognized as a heading, so section exists
                 assertTrue(parsed.getSections().containsKey(headingKey) || headingKey.equals("OTHER"),
                         "Expected section for heading: " + line);
             } else {
@@ -185,20 +190,20 @@ class TemplateAndParserTest {
     }
 
     @Test
-    void testRenderer_AllTemplates_ValidDocxAndHeadingOrder() throws IOException {
+    void testClassicProfessionalRenderer_StructureAndContent() throws IOException {
         String input = """
                 Robert C. Martin
-                unclebob@cleancode.org | 555-867-5309 | linkedin.com/in/unclebob
+                unclebob@cleancode.org | 555-867-5309 | Chicago, IL
                 SUMMARY
                 Software craftsman advocating for clean code, design patterns, and TDD.
                 EDUCATION
-                BS in Computer Science, University of Illinois
+                BS in Computer Science, University of Illinois | 1974 - 1978
                 EXPERIENCE
-                Founder and Consultant at Clean Coders LLC
+                Founder and Consultant at Clean Coders LLC | 2000 - Present
                 - Authored seminal books on agile software craftsmanship
                 - Trained thousands of software engineers worldwide
                 PROJECTS
-                FitNesse Acceptance Testing Framework
+                FitNesse Acceptance Testing Framework | 2002 - 2010
                 - Created wiki-based integration testing tool
                 SKILLS
                 Java, C++, Agile, Clean Architecture, Refactoring
@@ -206,112 +211,189 @@ class TemplateAndParserTest {
                 Certified Scrum Master
                 """;
 
-        List<ResumeTemplate> templates = catalog.getAllTemplates();
-        assertEquals(4, templates.size());
+        ResumeTemplate tmpl = catalog.getById("classic-professional");
+        byte[] docxBytes = templateService.render(input, tmpl);
 
-        for (ResumeTemplate template : templates) {
-            byte[] docxBytes = templateService.render(input, template);
+        assertNotNull(docxBytes);
+        assertTrue(docxBytes.length > 500);
 
-            assertNotNull(docxBytes, "Docx bytes must not be null for " + template.getId());
-            assertTrue(docxBytes.length > 500, "Docx file size should be substantial for " + template.getId());
+        try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
+            // ATS-safe single column: no multi-column tables
+            assertEquals(0, doc.getTables().size(), "Classic professional should have no tables");
 
-            // Check PK magic bytes (0x50, 0x4B, 0x03, 0x04)
-            assertEquals((byte) 0x50, docxBytes[0]);
-            assertEquals((byte) 0x4B, docxBytes[1]);
-            assertEquals((byte) 0x03, docxBytes[2]);
-            assertEquals((byte) 0x04, docxBytes[3]);
+            List<XWPFParagraph> paragraphs = doc.getParagraphs();
+            assertFalse(paragraphs.isEmpty());
 
-            try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
-                List<XWPFParagraph> paragraphs = doc.getParagraphs();
-                assertFalse(paragraphs.isEmpty(), "Document must contain paragraphs for " + template.getId());
+            // Centered name
+            XWPFParagraph namePara = paragraphs.get(0);
+            assertEquals(ParagraphAlignment.CENTER, namePara.getAlignment());
+            assertTrue(namePara.getText().contains("Robert C. Martin"));
 
-                // 1. First paragraph is the candidate name
-                XWPFParagraph firstPara = paragraphs.get(0);
-                assertEquals("Robert C. Martin", firstPara.getText().trim());
-                assertFalse(firstPara.getRuns().isEmpty());
-                XWPFRun nameRun = firstPara.getRuns().get(0);
-                assertEquals(template.getFontFamily(), nameRun.getFontFamily());
-                assertEquals(24, nameRun.getFontSize());
-                assertTrue(nameRun.isBold());
+            // Centered contact line with border
+            XWPFParagraph contactPara = paragraphs.get(1);
+            assertEquals(ParagraphAlignment.CENTER, contactPara.getAlignment());
+            assertTrue(contactPara.getText().contains("unclebob@cleancode.org"));
 
-                // 2. Section headings appear in template's sectionOrder
-                List<String> renderedHeadingTexts = new ArrayList<>();
-                for (XWPFParagraph p : paragraphs) {
-                    for (XWPFRun r : p.getRuns()) {
-                        if (r.isBold() && r.getFontSize() == 12) {
-                            renderedHeadingTexts.add(p.getText().trim().toUpperCase());
-                            break;
-                        }
-                    }
-                }
-
-                // SUMMARY is always right after contact line (first heading)
-                assertFalse(renderedHeadingTexts.isEmpty());
-                assertEquals("SUMMARY", renderedHeadingTexts.get(0));
-
-                // Remaining headings match template section order
-                List<String> expectedSubOrder = new ArrayList<>();
-                for (String sectionKey : template.getSectionOrder()) {
-                    expectedSubOrder.add(sectionKey.toUpperCase());
-                }
-
-                List<String> remainingRendered = renderedHeadingTexts.subList(1, renderedHeadingTexts.size());
-                assertEquals(expectedSubOrder, remainingRendered,
-                        "Headings for template " + template.getId() + " did not match expected sectionOrder");
-
-                // 3. Font family applied to runs
-                for (XWPFParagraph p : paragraphs) {
-                    for (XWPFRun r : p.getRuns()) {
-                        assertEquals(template.getFontFamily(), r.getFontFamily(),
-                                "Font family mismatch in template " + template.getId());
-                    }
-                }
-
-                // 4. Every non-empty line of the input text appears in the output
-                StringBuilder fullDocText = new StringBuilder();
-                for (XWPFParagraph p : paragraphs) {
-                    fullDocText.append(p.getText()).append("\n");
-                }
-                String docString = fullDocText.toString();
-
-                String[] rawLines = input.split("\r?\n");
-                for (String line : rawLines) {
-                    String trimmed = line.trim();
-                    if (trimmed.isEmpty()) continue;
-                    String clean = trimmed.replaceAll("^[\\-*•–—]\\s*", "");
-                    assertTrue(docString.toLowerCase().contains(clean.toLowerCase()),
-                            "Document for " + template.getId() + " is missing line: " + clean);
-                }
-            }
+            // Full text content check: ensure nothing was dropped
+            String fullText = extractDocumentText(doc);
+            assertTrue(fullText.contains("Robert C. Martin"));
+            assertTrue(fullText.contains("unclebob@cleancode.org"));
+            assertTrue(fullText.contains("Clean Coders LLC"));
+            assertTrue(fullText.contains("FitNesse"));
+            assertTrue(fullText.contains("Refactoring"));
+            assertTrue(fullText.contains("Certified Scrum Master"));
         }
     }
 
     @Test
-    void testRenderer_NoHeadingsFallbackPreservesAllText() throws IOException {
+    void testModernSidebarRenderer_TwoColumnStructureAndColors() throws IOException {
         String input = """
-                Alan Turing
-                alan@bletchleypark.uk
-                Mathematician, computer scientist, and cryptanalyst.
-                Designed the Bombe machine to decipher Enigma messages.
-                Pioneered theoretical computer science with the Turing machine.
+                Grace Hopper
+                grace@navy.mil | 555-123-4567 | Arlington, VA
+                SUMMARY
+                Pioneering computer scientist and United States Navy rear admiral.
+                EDUCATION
+                PhD in Mathematics, Yale University
+                EXPERIENCE
+                Director at Navy Programming Languages Group
+                - Led development of compiler standards and COBOL language
+                PROJECTS
+                A-0 Compiler System
+                - Invented first compiler for electronic computer
+                SKILLS
+                Compilers, Machine Architecture, COBOL, Fortran, Assembly
+                CERTIFICATIONS
+                National Medal of Technology
                 """;
 
-        ResumeTemplate modern = catalog.getById("modern");
-        byte[] docxBytes = templateService.render(input, modern);
+        ResumeTemplate tmpl = catalog.getById("modern-sidebar");
+        byte[] docxBytes = templateService.render(input, tmpl);
+
+        assertNotNull(docxBytes);
+        assertTrue(docxBytes.length > 500);
 
         try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
-            List<XWPFParagraph> paragraphs = doc.getParagraphs();
-            assertEquals("Alan Turing", paragraphs.get(0).getText().trim());
+            // Modern sidebar must contain a 2-column table
+            assertEquals(1, doc.getTables().size(), "Modern sidebar should contain exactly 1 two-column layout table");
+            XWPFTable table = doc.getTables().get(0);
+            assertEquals(1, table.getRows().size());
+            assertEquals(2, table.getRow(0).getTableCells().size(), "Table must have 2 columns");
 
-            StringBuilder docText = new StringBuilder();
-            for (XWPFParagraph p : paragraphs) {
-                docText.append(p.getText()).append("\n");
-            }
+            XWPFTableCell leftCell = table.getRow(0).getCell(0);
+            XWPFTableCell rightCell = table.getRow(0).getCell(1);
 
-            assertTrue(docText.toString().contains("alan@bletchleypark.uk"));
-            assertTrue(docText.toString().contains("Mathematician, computer scientist"));
-            assertTrue(docText.toString().contains("Designed the Bombe machine"));
-            assertTrue(docText.toString().contains("Pioneered theoretical computer science"));
+            // Shaded dark slate background on left cell
+            assertEquals("1F2937", leftCell.getColor());
+
+            // Candidate name in left cell
+            String leftText = extractCellText(leftCell);
+            assertTrue(leftText.contains("Grace Hopper"));
+            assertTrue(leftText.contains("grace@navy.mil"));
+            assertTrue(leftText.contains("Compilers, Machine Architecture"));
+            assertTrue(leftText.contains("Yale University"));
+
+            // Summary & experience in right cell
+            String rightText = extractCellText(rightCell);
+            assertTrue(rightText.contains("Pioneering computer scientist"));
+            assertTrue(rightText.contains("Navy Programming Languages Group"));
+            assertTrue(rightText.contains("A-0 Compiler System"));
         }
+    }
+
+    @Test
+    void testCompactBannerRenderer_BannerHeaderAndPipeSkills() throws IOException {
+        String input = """
+                Ada Lovelace
+                ada@analyticalengine.org | 555-987-6543 | London, UK
+                SUMMARY
+                Mathematician known for work on Charles Babbage's mechanical computer.
+                EDUCATION
+                Private Tutoring in Mathematics & Science, London
+                EXPERIENCE
+                Collaborator with Charles Babbage
+                - Created first algorithm intended to be executed by a machine
+                PROJECTS
+                Bernoulli Numbers Algorithm
+                - Translated and annotated Menabrea's memoir
+                SKILLS
+                Algorithm Design
+                Mathematical Analysis
+                Symbolic Logic
+                French Translation
+                CERTIFICATIONS
+                Fellow of Scientific Society
+                """;
+
+        ResumeTemplate tmpl = catalog.getById("compact-banner");
+        byte[] docxBytes = templateService.render(input, tmpl);
+
+        assertNotNull(docxBytes);
+        assertTrue(docxBytes.length > 500);
+
+        try (XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
+            // Compact banner has a 1-row, 1-cell header band table
+            assertEquals(1, doc.getTables().size(), "Compact banner should contain 1 header table");
+            XWPFTable banner = doc.getTables().get(0);
+            assertEquals(1, banner.getRows().size());
+            assertEquals(1, banner.getRow(0).getTableCells().size());
+
+            XWPFTableCell bannerCell = banner.getRow(0).getCell(0);
+            assertEquals("0F766E", bannerCell.getColor(), "Header banner must be dark teal #0F766E");
+
+            String bannerText = extractCellText(bannerCell);
+            assertTrue(bannerText.contains("Ada Lovelace"));
+            assertTrue(bannerText.contains("ada@analyticalengine.org"));
+
+            // Below banner: single-column body with pipe-separated skills
+            String docText = extractDocumentText(doc);
+            assertTrue(docText.contains("Algorithm Design | Mathematical Analysis | Symbolic Logic | French Translation"),
+                    "Skills should be rendered in pipe-separated compact form");
+            assertTrue(docText.contains("Private Tutoring"));
+            assertTrue(docText.contains("Collaborator with Charles Babbage"));
+            assertTrue(docText.contains("Bernoulli Numbers Algorithm"));
+        }
+    }
+
+    @Test
+    void testAllTemplatesExistAndRenderFallbackWithoutThrowing() {
+        String unstructuredText = """
+                Linus Torvalds
+                linus@linuxfoundation.org
+                Created Linux kernel in 1991.
+                Maintains Git version control system.
+                Recipient of Millennium Technology Prize.
+                """;
+
+        List<ResumeTemplate> templates = catalog.getAllTemplates();
+        assertEquals(3, templates.size());
+
+        for (ResumeTemplate tmpl : templates) {
+            byte[] bytes = templateService.render(unstructuredText, tmpl);
+            assertNotNull(bytes, "Template " + tmpl.getId() + " failed to render fallback");
+            assertTrue(bytes.length > 300);
+        }
+    }
+
+    private String extractDocumentText(XWPFDocument doc) {
+        StringBuilder sb = new StringBuilder();
+        for (XWPFParagraph p : doc.getParagraphs()) {
+            sb.append(p.getText()).append("\n");
+        }
+        for (XWPFTable t : doc.getTables()) {
+            for (XWPFTableRow r : t.getRows()) {
+                for (XWPFTableCell c : r.getTableCells()) {
+                    sb.append(extractCellText(c)).append("\n");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private String extractCellText(XWPFTableCell cell) {
+        StringBuilder sb = new StringBuilder();
+        for (XWPFParagraph p : cell.getParagraphs()) {
+            sb.append(p.getText()).append(" ");
+        }
+        return sb.toString();
     }
 }

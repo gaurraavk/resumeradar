@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 import { CompareVersionsResult } from '../types';
 
 const SAMPLE_A = `Alex Mercer
@@ -70,12 +70,11 @@ export const CompareView: React.FC = () => {
         }),
       });
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({ message: 'Comparison failed.' }));
-        throw new Error(errJson.message || `Request failed with status ${res.status}`);
+      const resData = await safeJson(res);
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.message || `Request failed with status ${res.status}`);
       }
 
-      const resData = await res.json();
       const payload: CompareVersionsResult = resData.data ?? resData;
       setResult(payload);
     } catch (err) {

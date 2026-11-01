@@ -19,7 +19,15 @@ import {
   UserSummary,
 } from './types';
 
-import { apiFetch, apiUpload, getUserToken, clearUserToken } from './lib/apiClient';
+import {
+  apiFetch,
+  apiUpload,
+  safeJson,
+  getUserToken,
+  clearUserToken,
+  subscribeServerWaking,
+  wakeUpServer,
+} from './lib/apiClient';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<string>('landing');
@@ -27,17 +35,25 @@ export function App() {
   const [currentResume, setCurrentResume] = useState<ResumeData | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | AnalysisFileResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isServerWaking, setIsServerWaking] = useState<boolean>(false);
 
   // User auth state
   const [currentUser, setCurrentUser] = useState<UserSummary | null>(null);
 
   useEffect(() => {
+    // 1. Send immediate wake-up request to Render free tier
+    wakeUpServer();
+
+    // 2. Subscribe to server waking notice (>3 seconds pending)
+    const unsubscribeWaking = subscribeServerWaking(setIsServerWaking);
+
+    // 3. Hydrate authenticated user if token exists
     const token = getUserToken();
     if (token) {
       apiFetch('/api/v1/auth/me')
         .then(async (res) => {
           if (res.ok) {
-            const json = await res.json();
+            const json = await safeJson(res);
             if (json.success && json.data) {
               setCurrentUser({
                 id: json.data.id,
@@ -52,6 +68,10 @@ export function App() {
         })
         .catch(() => {});
     }
+
+    return () => {
+      unsubscribeWaking();
+    };
   }, []);
 
   const handleAuthSuccess = (user: UserSummary) => {
@@ -88,11 +108,21 @@ export function App() {
     setCurrentTab('landing');
   };
 
+  // Store last analysis inputs for resilient session re-hydration
+  const [lastInputs, setLastInputs] = useState<{
+    mode: 'text' | 'file';
+    resume?: ResumeData;
+    file?: File;
+    jobDescription: string;
+    jobTitle: string;
+  } | null>(null);
+
   // Text-only analysis (existing endpoint)
   const handleRunAnalysis = async (resume: ResumeData, jobDescription: string, jobTitle: string) => {
     setIsAnalyzing(true);
     setAnalysisError(null);
     setCurrentResume(resume);
+    setLastInputs({ mode: 'text', resume, jobDescription, jobTitle });
 
     try {
       const resumeText = resume.rawText || [
@@ -111,12 +141,12 @@ export function App() {
         }),
       });
 
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({ message: 'Analysis failed.' }));
-        throw new Error(errJson.message || `Analysis failed with status ${response.status}`);
+      const resData = await safeJson(response);
+
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.message || `Analysis failed with status ${response.status}`);
       }
 
-      const resData = await response.json();
       const payload: AnalysisResult = resData.data ?? resData;
 
       setAnalysisResult(payload);
@@ -133,6 +163,7 @@ export function App() {
   const handleRunFileAnalysis = async (file: File, jobDescription: string, jobTitle: string) => {
     setIsAnalyzing(true);
     setAnalysisError(null);
+    setLastInputs({ mode: 'file', file, jobDescription, jobTitle });
     setCurrentResume({
       id: 'file-' + Date.now(),
       name: file.name.replace(/\.[^/.]+$/, ''),
@@ -156,13 +187,12 @@ export function App() {
       formData.append('jobTitle', jobTitle || 'Target Role');
 
       const response = await apiUpload('/api/v1/analyze-file', formData);
+      const resData = await safeJson(response);
 
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({ message: 'Analysis failed.' }));
-        throw new Error(errJson.message || `Analysis failed with status ${response.status}`);
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.message || `Analysis failed with status ${response.status}`);
       }
 
-      const resData = await response.json();
       const payload: AnalysisFileResult = resData.data ?? resData;
 
       setAnalysisResult(payload);
@@ -175,8 +205,60 @@ export function App() {
     }
   };
 
+  const handleReRunAnalysis = async (): Promise<string | null> => {
+    if (!lastInputs) return null;
+    try {
+      if (lastInputs.mode === 'text' && lastInputs.resume) {
+        const resumeText = lastInputs.resume.rawText || [
+          lastInputs.resume.summary || '',
+          lastInputs.resume.skills?.join(' ') || '',
+          ...(lastInputs.resume.experience || []).map(e => `${e.role} ${e.company} ${e.bullets.join(' ')}`),
+        ].join('\n');
+
+        const response = await apiFetch('/api/v1/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            resumeText,
+            jobDescription: lastInputs.jobDescription,
+            jobTitle: lastInputs.jobTitle || 'Target Role',
+          }),
+        });
+        const resData = await safeJson(response);
+        if (!response.ok || !resData.success) return null;
+        const payload: AnalysisResult = resData.data ?? resData;
+        setAnalysisResult(payload);
+        return payload.analysisId || null;
+      } else if (lastInputs.mode === 'file' && lastInputs.file) {
+        const formData = new FormData();
+        formData.append('file', lastInputs.file);
+        formData.append('jobDescription', lastInputs.jobDescription);
+        formData.append('jobTitle', lastInputs.jobTitle || 'Target Role');
+
+        const response = await apiUpload('/api/v1/analyze-file', formData);
+        const resData = await safeJson(response);
+        if (!response.ok || !resData.success) return null;
+        const payload: AnalysisFileResult = resData.data ?? resData;
+        setAnalysisResult(payload);
+        return payload.analysisId || null;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#1d1d1f] selection:text-white">
+      {/* Visible server waking notice (>3s pending) */}
+      {isServerWaking && (
+        <div className="bg-amber-500/15 border-b border-amber-500/25 text-amber-900 px-4 py-2.5 text-center text-[12.5px] font-medium flex items-center justify-center gap-2 backdrop-blur-md sticky top-0 z-50 animate-entrance shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0"></span>
+          <span className="material-symbols-outlined text-[16px] text-amber-700">hourglass_top</span>
+          <span>Server is waking up (free hosting) - this can take up to a minute</span>
+        </div>
+      )}
+
       <TopNav
         currentTab={currentTab}
         onNavigate={handleNavigate}
@@ -217,6 +299,7 @@ export function App() {
             onNewScan={() => handleNavigate('new-analysis')}
             isLoggedIn={!!currentUser}
             onNavigateToAuth={() => handleNavigate('auth')}
+            onReRunAnalysis={handleReRunAnalysis}
           />
         )}
 

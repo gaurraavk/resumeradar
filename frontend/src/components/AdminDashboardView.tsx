@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminFetch } from '../lib/apiClient';
+import { adminFetch, safeJson } from '../lib/apiClient';
 import { AdminAnalyticsData, UserProfile } from '../types';
 import {
   BarChart,
@@ -44,20 +44,20 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       }
 
       if (analyticsRes.ok) {
-        const analyticsJson = await analyticsRes.json();
+        const analyticsJson = await safeJson(analyticsRes);
         if (analyticsJson.success && analyticsJson.data) {
           setAnalytics(analyticsJson.data);
         }
       }
 
       if (usersRes.ok) {
-        const usersJson = await usersRes.json();
+        const usersJson = await safeJson(usersRes);
         if (usersJson.success && Array.isArray(usersJson.data)) {
           setUsers(usersJson.data);
         }
       }
     } catch (err: any) {
-      setError('Unable to load analytics data from server.');
+      setError(err?.message || 'Unable to load analytics data from server.');
     } finally {
       setLoading(false);
     }

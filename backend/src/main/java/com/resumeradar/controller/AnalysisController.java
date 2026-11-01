@@ -255,7 +255,6 @@ public class AnalysisController {
         }
 
         ResumeFixService.FixResult fixResult = resumeFixService.fixResume(analysisId);
-        String downloadUrl = "/api/v1/download/fixed-resume/" + analysisId;
 
         List<String> fixes = new ArrayList<>(fixResult.getFixesApplied());
         String resTemplateId = "original";
@@ -273,6 +272,9 @@ public class AnalysisController {
             historyService.recordTemplateUsed(analysisId, resTemplateId);
         }
 
+        long timestamp = System.currentTimeMillis();
+        String downloadUrl = "/api/v1/download/fixed-resume/" + analysisId + "?templateId=" + resTemplateId + "&v=" + timestamp;
+
         FixResumeResponse response = new FixResumeResponse(
                 fixResult.getOriginalScore(),
                 fixResult.getImprovedScore(),
@@ -286,7 +288,9 @@ public class AnalysisController {
 
     // Task 5: Download fixed resume
     @GetMapping("/download/fixed-resume/{analysisId}")
-    public ResponseEntity<byte[]> downloadFixedResume(@PathVariable String analysisId) {
+    public ResponseEntity<byte[]> downloadFixedResume(
+            @PathVariable String analysisId,
+            @RequestParam(value = "templateId", required = false) String templateId) {
         AnalysisSession session = sessionStore.get(analysisId);
         if (session == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -297,17 +301,13 @@ public class AnalysisController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        String orig = session.getOriginalFileName();
-        if (orig == null || orig.isBlank()) {
-            orig = "resume.docx";
-        }
-        if (!orig.toLowerCase().endsWith(".docx")) {
-            orig = orig.replaceAll("\\.[^.]+$", "") + ".docx";
-        }
-        String filename = "fixed_" + orig;
+        String tId = (templateId != null && !templateId.isBlank()) ? templateId : "original";
+        String filename = "resume_" + tId + ".docx";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
+                .header("Pragma", "no-cache")
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
                 .body(fixedBytes);
     }

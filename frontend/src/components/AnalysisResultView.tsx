@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { AnalysisResult, AnalysisFileResult, FormattingWarning, FixResumeResult, ResumeData, ResumeTemplate } from '../types';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 
 const ORIGINAL_TEMPLATE: ResumeTemplate = {
   id: 'original',
   name: 'Original layout',
-  description: "Keeps today's exact document layout and structure",
+  description: "Keeps document's exact layout and structure",
+  layoutType: 'SINGLE_COLUMN',
   fontFamily: 'Calibri',
   accentColorHex: '#1d1d1f',
   nameAlignment: 'LEFT',
@@ -16,48 +17,40 @@ const ORIGINAL_TEMPLATE: ResumeTemplate = {
 
 const DEFAULT_TEMPLATES: ResumeTemplate[] = [
   {
-    id: 'classic',
-    name: 'Classic',
-    description: 'Traditional serif typography with centered header and academic priority',
+    id: 'classic-professional',
+    name: 'Classic Professional',
+    description: 'ATS-safe single column with centered header, ruled headings, and right-aligned dates',
+    layoutType: 'SINGLE_COLUMN',
     fontFamily: 'Times New Roman',
     accentColorHex: '#000000',
     nameAlignment: 'CENTER',
     headingCase: 'UPPER',
     showDividerLine: true,
-    sectionOrder: ['EDUCATION', 'EXPERIENCE', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS'],
+    sectionOrder: ['SUMMARY', 'EDUCATION', 'EXPERIENCE', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS'],
   },
   {
-    id: 'modern',
-    name: 'Modern',
-    description: 'Sleek sans-serif style with indigo accents and skills-forward hierarchy',
+    id: 'modern-sidebar',
+    name: 'Modern Sidebar',
+    description: 'Two-column layout with dark slate sidebar for skills and credentials',
+    layoutType: 'SIDEBAR_TWO_COLUMN',
     fontFamily: 'Calibri',
-    accentColorHex: '#4F46E5',
+    accentColorHex: '#1F2937',
     nameAlignment: 'LEFT',
-    headingCase: 'TITLE',
-    showDividerLine: false,
-    sectionOrder: ['SKILLS', 'EXPERIENCE', 'PROJECTS', 'EDUCATION', 'CERTIFICATIONS'],
+    headingCase: 'UPPER',
+    showDividerLine: true,
+    sectionOrder: ['SUMMARY', 'EXPERIENCE', 'PROJECTS', 'SKILLS', 'EDUCATION', 'CERTIFICATIONS'],
   },
   {
-    id: 'fresher-focus',
-    name: 'Fresher Focus',
-    description: 'Teal accents highlighting education and projects for students',
+    id: 'compact-banner',
+    name: 'Compact Banner',
+    description: 'Single-page compact density with full-width teal banner and pipe skills',
+    layoutType: 'BANNER_COMPACT',
     fontFamily: 'Arial',
     accentColorHex: '#0F766E',
-    nameAlignment: 'LEFT',
-    headingCase: 'UPPER',
-    showDividerLine: true,
-    sectionOrder: ['EDUCATION', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS', 'EXPERIENCE'],
-  },
-  {
-    id: 'executive',
-    name: 'Executive',
-    description: 'Distinguished navy Georgia serif emphasizing leadership experience',
-    fontFamily: 'Georgia',
-    accentColorHex: '#1E3A8A',
     nameAlignment: 'CENTER',
     headingCase: 'UPPER',
-    showDividerLine: true,
-    sectionOrder: ['EXPERIENCE', 'SKILLS', 'EDUCATION', 'PROJECTS', 'CERTIFICATIONS'],
+    showDividerLine: false,
+    sectionOrder: ['SUMMARY', 'EDUCATION', 'EXPERIENCE', 'PROJECTS', 'SKILLS', 'CERTIFICATIONS'],
   },
 ];
 
@@ -67,6 +60,7 @@ interface AnalysisResultViewProps {
   onNewScan: () => void;
   isLoggedIn?: boolean;
   onNavigateToAuth?: () => void;
+  onReRunAnalysis?: () => Promise<string | null>;
 }
 
 export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
@@ -75,6 +69,7 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
   onNewScan,
   isLoggedIn = false,
   onNavigateToAuth,
+  onReRunAnalysis,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'keywords' | 'autofix'>('overview');
   const [isFixing, setIsFixing] = useState(false);
@@ -83,12 +78,18 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
   const [templates, setTemplates] = useState<ResumeTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('original');
 
+  // Reset fix result whenever a new analysis result is loaded
+  useEffect(() => {
+    setFixResult(null);
+    setFixError(null);
+  }, [result.analysisId]);
+
   useEffect(() => {
     let isMounted = true;
     apiFetch('/api/v1/templates')
       .then(async res => {
         if (res.ok) {
-          const json = await res.json();
+          const json = await safeJson(res);
           const list = json.data ?? json;
           if (isMounted && Array.isArray(list) && list.length > 0) {
             setTemplates(list);
@@ -154,11 +155,32 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
           templateId: selectedTemplateId !== 'original' ? selectedTemplateId : undefined,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: 'Fix failed.' }));
-        throw new Error(err.message || 'Fix failed');
+
+      // Handle server restart / session timeout recovery
+      if (res.status === 404 && onReRunAnalysis) {
+        const newAnalysisId = await onReRunAnalysis();
+        if (newAnalysisId) {
+          const retryRes = await apiFetch('/api/v1/generate-fixed-resume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              analysisId: newAnalysisId,
+              templateId: selectedTemplateId !== 'original' ? selectedTemplateId : undefined,
+            }),
+          });
+          const retryData = await safeJson(retryRes);
+          if (retryRes.ok && retryData.success) {
+            setFixResult(retryData.data ?? retryData);
+            return;
+          }
+        }
+        throw new Error('Analysis session expired and auto-recovery failed. Please start a new scan.');
       }
-      const data = await res.json();
+
+      const data = await safeJson(res);
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Fix failed');
+      }
       setFixResult(data.data ?? data);
     } catch (err) {
       setFixError(err instanceof Error ? err.message : 'Auto-fix failed.');
@@ -167,10 +189,31 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!fixResult?.downloadUrl) return;
     const base = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
-    window.open(`${base}${fixResult.downloadUrl}`, '_blank');
+    const fullUrl = fixResult.downloadUrl.startsWith('http')
+      ? fixResult.downloadUrl
+      : `${base}${fixResult.downloadUrl}`;
+
+    try {
+      const res = await apiFetch(fullUrl);
+      if (!res.ok) {
+        throw new Error(`Download failed with status ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const tid = fixResult.templateId || selectedTemplateId || 'original';
+      a.download = `resume_${tid}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setFixError(err instanceof Error ? err.message : 'Failed to download resume file.');
+    }
   };
 
   const renderTemplatePicker = (titleNote?: string) => (
@@ -182,7 +225,7 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
             Choose a resume template
           </label>
           <p className="text-[12px] text-neutral-500 font-normal mt-0.5">
-            {titleNote || 'Select an ATS-compliant layout to format your downloadable Word document'}
+            {titleNote || 'Select a structurally distinct layout to format your downloadable Word document'}
           </p>
         </div>
         <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline">
@@ -192,30 +235,41 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {allTemplates.map(tmpl => {
           const isSelected = selectedTemplateId === tmpl.id;
-          const previewSections = tmpl.id === 'original'
-            ? ['EXPERIENCE', 'EDUCATION', 'SKILLS']
-            : (tmpl.sectionOrder || ['EXPERIENCE', 'EDUCATION', 'SKILLS']).slice(0, 3);
+          const isSidebar = tmpl.id === 'modern-sidebar' || tmpl.layoutType === 'SIDEBAR_TWO_COLUMN';
+          const isBanner = tmpl.id === 'compact-banner' || tmpl.layoutType === 'BANNER_COMPACT';
+          const isClassic = tmpl.id === 'classic-professional';
+          const isOriginal = tmpl.id === 'original';
+
+          const badgeText = isSidebar ? 'Two-column - visual design' : 'ATS-safe';
+          const badgeClass = isSidebar
+            ? 'bg-indigo-50 text-indigo-700 border-indigo-200/60'
+            : 'bg-emerald-50 text-emerald-700 border-emerald-200/60';
 
           return (
             <button
               key={tmpl.id}
               type="button"
               onClick={() => setSelectedTemplateId(tmpl.id)}
-              className={`relative text-left p-3 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
+              className={`relative text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
                 isSelected
                   ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-500/25 shadow-xs'
                   : 'border-black/[0.08] bg-white hover:border-black/20 hover:bg-neutral-50/60 shadow-2xs'
               }`}
             >
               {/* Card Header */}
-              <div className="flex items-start justify-between gap-1.5 mb-2.5">
+              <div className="flex items-start justify-between gap-1.5 mb-2">
                 <div className="min-w-0 pr-1">
-                  <span className="text-[13px] font-semibold text-[#1d1d1f] leading-snug block truncate">
-                    {tmpl.name}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[13px] font-semibold text-[#1d1d1f] leading-snug">
+                      {tmpl.name}
+                    </span>
+                    <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-semibold border ${badgeClass}`}>
+                      {badgeText}
+                    </span>
+                  </div>
                   <span className="text-[10.5px] text-neutral-400 line-clamp-1 block leading-tight mt-0.5">
                     {tmpl.description}
                   </span>
@@ -231,55 +285,113 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                 </span>
               </div>
 
-              {/* Mini CSS Page Preview */}
+              {/* Structural Mini Preview */}
               <div
-                className="w-full h-32 bg-white rounded-xl border border-black/[0.06] p-2 flex flex-col gap-1 overflow-hidden pointer-events-none select-none text-[8px] shadow-2xs transition-transform duration-200 group-hover:scale-[1.01]"
+                className="w-full h-36 bg-white rounded-xl border border-black/[0.08] overflow-hidden pointer-events-none select-none text-[8px] shadow-2xs transition-transform duration-200 group-hover:scale-[1.01]"
                 style={{ fontFamily: tmpl.fontFamily }}
               >
-                {/* Header preview */}
-                <div
-                  className={`font-bold text-[9px] text-[#1d1d1f] leading-none ${
-                    tmpl.nameAlignment === 'CENTER' ? 'text-center' : 'text-left'
-                  }`}
-                >
-                  Jane Doe
-                </div>
-
-                {/* Contact preview */}
-                <div
-                  className={`text-[6.5px] text-neutral-400 leading-none pb-0.5 ${
-                    tmpl.nameAlignment === 'CENTER' ? 'text-center' : 'text-left'
-                  }`}
-                >
-                  jane@example.com • 555-0199
-                </div>
-
-                {/* Section headings preview */}
-                <div className="flex flex-col gap-1.5 mt-0.5 border-t border-black/[0.04] pt-1">
-                  {previewSections.map((sec, idx) => {
-                    const headingText =
-                      tmpl.headingCase === 'TITLE'
-                        ? sec.charAt(0) + sec.slice(1).toLowerCase()
-                        : sec.toUpperCase();
-
-                    return (
-                      <div key={idx} className="flex flex-col gap-0.5">
-                        <div
-                          className={`font-bold text-[7.5px] leading-tight ${
-                            tmpl.showDividerLine ? 'border-b border-black/[0.15] pb-0.5' : ''
-                          }`}
-                          style={{ color: tmpl.accentColorHex }}
-                        >
-                          {headingText}
+                {/* 1. Classic Professional Preview */}
+                {isClassic && (
+                  <div className="p-2 flex flex-col gap-1 h-full">
+                    <div className="text-center font-bold text-[9px] text-black">Jane Doe</div>
+                    <div className="text-center text-[6px] text-neutral-500 pb-0.5 border-b border-black">
+                      jane@example.com | (555) 0199 | Austin, TX
+                    </div>
+                    <div className="flex flex-col gap-1 mt-0.5">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="font-bold text-[7px] text-black border-b border-black/30 uppercase">
+                          SUMMARY
                         </div>
-                        <div className="flex flex-col gap-0.5 pl-0.5">
-                          <div className="h-0.5 bg-neutral-200/80 rounded-full w-full"></div>
-                          <div className="h-0.5 bg-neutral-200/60 rounded-full w-3/4"></div>
-                        </div>
+                        <div className="h-1 bg-neutral-200 rounded w-full"></div>
                       </div>
-                    );
-                  })}
-                </div>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex justify-between items-center font-bold text-[7px] text-black border-b border-black/30 uppercase">
+                          <span>EXPERIENCE</span>
+                          <span className="text-[5.5px] text-neutral-500 font-normal">2021 – Present</span>
+                        </div>
+                        <div className="h-1 bg-neutral-200 rounded w-5/6"></div>
+                        <div className="h-1 bg-neutral-200 rounded w-4/6"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Modern Sidebar Preview */}
+                {isSidebar && (
+                  <div className="flex h-full">
+                    {/* Left shaded column (~34%) */}
+                    <div className="w-[36%] bg-[#1F2937] text-white p-1.5 flex flex-col gap-1 shrink-0">
+                      <div className="font-bold text-[8.5px] text-white leading-tight">Jane Doe</div>
+                      <div className="text-[5.5px] text-neutral-300 leading-tight">jane@example.com</div>
+                      <div className="mt-1 border-t border-neutral-600 pt-1">
+                        <div className="font-bold text-[6.5px] text-blue-300 uppercase">SKILLS</div>
+                        <div className="h-0.5 bg-neutral-400 rounded w-full my-0.5"></div>
+                        <div className="h-0.5 bg-neutral-400 rounded w-4/5"></div>
+                      </div>
+                      <div className="mt-0.5 border-t border-neutral-600 pt-0.5">
+                        <div className="font-bold text-[6.5px] text-blue-300 uppercase">EDUCATION</div>
+                        <div className="h-0.5 bg-neutral-400 rounded w-3/4"></div>
+                      </div>
+                    </div>
+                    {/* Right column (~64%) */}
+                    <div className="flex-1 p-1.5 flex flex-col gap-1 bg-white">
+                      <div className="font-bold text-[7px] text-[#1F2937] border-b border-neutral-300 uppercase pb-0.5">
+                        SUMMARY
+                      </div>
+                      <div className="h-1 bg-neutral-200 rounded w-full"></div>
+                      <div className="font-bold text-[7px] text-[#1F2937] border-b border-neutral-300 uppercase pb-0.5 mt-0.5">
+                        EXPERIENCE
+                      </div>
+                      <div className="h-1 bg-neutral-200 rounded w-full"></div>
+                      <div className="h-1 bg-neutral-200 rounded w-4/5"></div>
+                      <div className="h-1 bg-neutral-200 rounded w-3/5"></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Compact Banner Preview */}
+                {isBanner && (
+                  <div className="flex flex-col h-full">
+                    {/* Full-width colored top band */}
+                    <div className="bg-[#0F766E] text-white py-1 px-2 text-center">
+                      <div className="font-bold text-[9px] text-white leading-none">Jane Doe</div>
+                      <div className="text-[5.5px] text-emerald-100 mt-0.5 leading-none">
+                        jane@example.com | 555-0199 | Austin, TX
+                      </div>
+                    </div>
+                    {/* Compact body below */}
+                    <div className="p-1.5 flex flex-col gap-0.5 flex-1">
+                      <div className="font-bold text-[6.5px] text-[#0F766E] uppercase">EDUCATION</div>
+                      <div className="h-0.5 bg-neutral-200 rounded w-full"></div>
+                      <div className="font-bold text-[6.5px] text-[#0F766E] uppercase mt-0.5">EXPERIENCE</div>
+                      <div className="h-0.5 bg-neutral-200 rounded w-full"></div>
+                      <div className="h-0.5 bg-neutral-200 rounded w-4/5"></div>
+                      <div className="font-bold text-[6.5px] text-[#0F766E] uppercase mt-0.5">SKILLS</div>
+                      <div className="text-[5.5px] text-neutral-600 truncate">Java | Spring Boot | REST | SQL | Git</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Original Layout Preview */}
+                {isOriginal && (
+                  <div className="p-2 flex flex-col gap-1 h-full">
+                    <div className="font-bold text-[9px] text-[#1d1d1f] text-left">Jane Doe</div>
+                    <div className="text-[6px] text-neutral-400 text-left pb-0.5">
+                      jane@example.com • 555-0199
+                    </div>
+                    <div className="flex flex-col gap-1.5 mt-0.5 border-t border-black/[0.04] pt-1">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="font-bold text-[7px] text-neutral-800 uppercase">EXPERIENCE</div>
+                        <div className="h-1 bg-neutral-200 rounded w-full"></div>
+                        <div className="h-1 bg-neutral-200 rounded w-3/4"></div>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="font-bold text-[7px] text-neutral-800 uppercase">EDUCATION</div>
+                        <div className="h-1 bg-neutral-200 rounded w-5/6"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </button>
           );

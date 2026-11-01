@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 import { ResumeQualityResult } from '../types';
 
 const SAMPLE_MEDIOCRE_RESUME = `Bob Smith
@@ -60,12 +60,11 @@ export const QualityAnalyzerView: React.FC = () => {
         body: JSON.stringify({ resumeText }),
       });
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({ message: 'Quality analysis failed.' }));
-        throw new Error(errJson.message || `Request failed with status ${res.status}`);
+      const resData = await safeJson(res);
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.message || `Request failed with status ${res.status}`);
       }
 
-      const resData = await res.json();
       const payload: ResumeQualityResult = resData.data ?? resData;
       setResult(payload);
     } catch (err) {

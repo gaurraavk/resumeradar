@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiFetch, setUserToken } from '../lib/apiClient';
+import { apiFetch, safeJson, setUserToken } from '../lib/apiClient';
 import { UserSummary } from '../types';
 
 interface AuthViewProps {
@@ -17,12 +17,15 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    const normalizedEmail = email.trim().toLowerCase();
 
     if (mode === 'register') {
       if (!fullName.trim()) {
@@ -35,8 +38,14 @@ export const AuthView: React.FC<AuthViewProps> = ({
       }
     }
 
-    if (!email.trim() || !password) {
+    if (!normalizedEmail || !password) {
       setErrorMessage('Please fill in all required fields');
+      return;
+    }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setErrorMessage('Please enter a valid email address');
       return;
     }
 
@@ -45,8 +54,8 @@ export const AuthView: React.FC<AuthViewProps> = ({
     try {
       const endpoint = mode === 'register' ? '/api/v1/auth/register' : '/api/v1/auth/login';
       const payload = mode === 'register'
-        ? { fullName: fullName.trim(), email: email.trim(), password }
-        : { email: email.trim(), password };
+        ? { fullName: fullName.trim(), email: normalizedEmail, password }
+        : { email: normalizedEmail, password };
 
       const response = await apiFetch(endpoint, {
         method: 'POST',
@@ -54,13 +63,13 @@ export const AuthView: React.FC<AuthViewProps> = ({
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await safeJson(response);
 
       if (!response.ok || !data.success) {
         if (response.status === 409) {
-          setErrorMessage('An account with this email already exists. Try signing in.');
+          setErrorMessage(data.message || 'An account with this email already exists - try signing in.');
         } else if (response.status === 401) {
-          setErrorMessage('Invalid email or password. Please try again.');
+          setErrorMessage(data.message || 'Invalid email or password. Please try again.');
         } else {
           setErrorMessage(data.message || 'Something went wrong. Please check your details.');
         }
@@ -69,13 +78,14 @@ export const AuthView: React.FC<AuthViewProps> = ({
       }
 
       if (data.data?.token && data.data?.user) {
+        // Auto sign-in on both register and login
         setUserToken(data.data.token);
         onAuthSuccess(data.data.user);
       } else {
         setErrorMessage('Unexpected response format from server.');
       }
     } catch (err: any) {
-      setErrorMessage('Network error. Please check your connection and try again.');
+      setErrorMessage(err?.message || 'Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -153,6 +163,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="e.g. Jane Doe"
+                autoComplete="name"
                 required
                 className="w-full px-4 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
               />
@@ -168,6 +179,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
+              autoComplete="email"
               required
               className="w-full px-4 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
             />
@@ -177,23 +189,45 @@ export const AuthView: React.FC<AuthViewProps> = ({
             <label className="text-[12px] font-semibold text-neutral-600 tracking-wide uppercase">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'register' ? 'Minimum 8 characters' : 'Your password'}
-              required
-              className="w-full px-4 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
-            />
+            <div className="relative flex items-center">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === 'register' ? 'Minimum 8 characters' : 'Your password'}
+                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                required
+                className="w-full pl-4 pr-11 py-2.5 rounded-2xl border border-black/[0.08] bg-[#fbfbfd] text-[#1d1d1f] text-[14px] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 text-neutral-400 hover:text-neutral-600 cursor-pointer p-1 rounded-lg focus:outline-none"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 rounded-2xl bg-[#1d1d1f] hover:bg-black text-white text-[14px] font-medium transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.99] shadow-sm"
+            aria-busy={loading}
+            className={`w-full mt-2 py-3 rounded-2xl bg-[#1d1d1f] text-white text-[14px] font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+              loading
+                ? 'opacity-60 cursor-not-allowed'
+                : 'hover:bg-black cursor-pointer active:scale-[0.99]'
+            }`}
           >
             {loading ? (
-              <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+              <>
+                <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                <span>{mode === 'login' ? 'Signing in...' : 'Creating account...'}</span>
+              </>
             ) : (
               <>
                 <span>{mode === 'login' ? 'Sign in' : 'Create account'}</span>

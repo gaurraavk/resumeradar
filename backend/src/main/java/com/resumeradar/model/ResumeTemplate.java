@@ -36,6 +36,9 @@ public class ResumeTemplate {
     @Column(name = "section_order", length = 500, nullable = false)
     private List<String> sectionOrder;
 
+    @Column(name = "layout_type", length = 32)
+    private String layoutType; // "SINGLE_COLUMN", "SIDEBAR_TWO_COLUMN", "BANNER_COMPACT"
+
     public ResumeTemplate() {}
 
     public ResumeTemplate(String id,
@@ -47,6 +50,19 @@ public class ResumeTemplate {
                           String headingCase,
                           boolean showDividerLine,
                           List<String> sectionOrder) {
+        this(id, name, description, fontFamily, accentColorHex, nameAlignment, headingCase, showDividerLine, sectionOrder, "SINGLE_COLUMN");
+    }
+
+    public ResumeTemplate(String id,
+                          String name,
+                          String description,
+                          String fontFamily,
+                          String accentColorHex,
+                          String nameAlignment,
+                          String headingCase,
+                          boolean showDividerLine,
+                          List<String> sectionOrder,
+                          String layoutType) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -56,6 +72,7 @@ public class ResumeTemplate {
         this.headingCase = headingCase;
         this.showDividerLine = showDividerLine;
         this.sectionOrder = sectionOrder;
+        this.layoutType = layoutType != null ? layoutType : "SINGLE_COLUMN";
     }
 
     public String getId() {
@@ -128,5 +145,13 @@ public class ResumeTemplate {
 
     public void setSectionOrder(List<String> sectionOrder) {
         this.sectionOrder = sectionOrder;
+    }
+
+    public String getLayoutType() {
+        return layoutType != null ? layoutType : "SINGLE_COLUMN";
+    }
+
+    public void setLayoutType(String layoutType) {
+        this.layoutType = layoutType;
     }
 }

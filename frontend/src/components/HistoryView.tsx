@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 import { HistoryRecord } from '../types';
 
 interface HistoryViewProps {
@@ -27,7 +27,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         onNavigateToAuth();
         return;
       }
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success && Array.isArray(data.data)) {
         setHistory(data.data);
       } else {

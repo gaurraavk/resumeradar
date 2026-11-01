@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BestFitResult } from '../types';
-import { apiFetch } from '../lib/apiClient';
+import { apiFetch, safeJson } from '../lib/apiClient';
 
 interface JobEntry {
   id: string;
@@ -105,12 +105,12 @@ export const BestFitView: React.FC = () => {
         }),
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: 'Comparison failed.' }));
-        throw new Error(err.message || `Comparison failed with status ${res.status}`);
+      const data = await safeJson(res);
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || `Comparison failed with status ${res.status}`);
       }
 
-      const data = await res.json();
       const outputList: BestFitResult[] = data.data?.results ?? data.results ?? [];
       setResults(outputList);
       if (outputList.length > 0) {

@@ -259,16 +259,15 @@ class AuthAndHistoryIntegrationTest {
     @Test
     void testTemplatesSeededInDatabase() throws Exception {
         long count = resumeTemplateRepository.count();
-        assertTrue(count >= 4, "Database must have at least 4 seeded templates");
+        assertTrue(count >= 3, "Database must have at least 3 seeded templates");
 
         mockMvc.perform(get("/api/v1/templates"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(4))))
-                .andExpect(jsonPath("$.data[0].id").value("classic"))
-                .andExpect(jsonPath("$.data[1].id").value("modern"))
-                .andExpect(jsonPath("$.data[2].id").value("fresher-focus"))
-                .andExpect(jsonPath("$.data[3].id").value("executive"));
+                .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(3))))
+                .andExpect(jsonPath("$.data[0].id").value("classic-professional"))
+                .andExpect(jsonPath("$.data[1].id").value("modern-sidebar"))
+                .andExpect(jsonPath("$.data[2].id").value("compact-banner"));
     }
 
     @Test
@@ -287,20 +286,20 @@ class AuthAndHistoryIntegrationTest {
 
         String analysisId = objectMapper.readTree(analysisResult.getResponse().getContentAsString()).path("data").path("analysisId").asText();
 
-        // Generate fixed resume with modern template
+        // Generate fixed resume with classic-professional template
         mockMvc.perform(post("/api/v1/generate-fixed-resume")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "analysisId", analysisId,
-                                "templateId", "modern"
+                                "templateId", "classic-professional"
                         ))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.templateId").value("modern"));
+                .andExpect(jsonPath("$.data.templateId").value("classic-professional"));
 
         // Verify template_used updated in DB
         Optional<AnalysisRecord> updated = analysisRecordRepository.findFirstByAnalysisId(analysisId);
         assertTrue(updated.isPresent());
-        assertEquals("modern", updated.get().getTemplateUsed());
+        assertEquals("classic-professional", updated.get().getTemplateUsed());
     }
 
     @Test

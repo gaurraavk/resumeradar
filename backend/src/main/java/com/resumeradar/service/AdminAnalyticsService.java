@@ -85,12 +85,15 @@ public class AdminAnalyticsService {
         }
 
         // Template Usage
-        List<ResumeTemplate> dbTemplates = resumeTemplateRepository.findAll();
         Map<String, String> templateNameMap = new LinkedHashMap<>();
+        templateNameMap.put("classic-professional", "Classic Professional");
+        templateNameMap.put("modern-sidebar", "Modern Sidebar");
+        templateNameMap.put("compact-banner", "Compact Banner");
         templateNameMap.put("classic", "Classic");
         templateNameMap.put("modern", "Modern");
         templateNameMap.put("fresher-focus", "Fresher Focus");
         templateNameMap.put("executive", "Executive");
+        List<ResumeTemplate> dbTemplates = resumeTemplateRepository != null ? resumeTemplateRepository.findAll() : Collections.emptyList();
         for (ResumeTemplate t : dbTemplates) {
             templateNameMap.put(t.getId().toLowerCase(), t.getName());
         }
