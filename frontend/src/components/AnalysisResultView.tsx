@@ -887,13 +887,8 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                     </ul>
                   </div>
 
-                  {/* Pick another template and regenerate */}
-                  <div className="pt-2 border-t border-emerald-100/70">
-                    {renderTemplatePicker('Switch template and regenerate')}
-                  </div>
-
-                  {/* Download and Re-generate buttons */}
-                  <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Download button */}
+                  <div className="pt-2">
                     <button
                       type="button"
                       onClick={handleDownload}
@@ -901,15 +896,6 @@ export const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({
                     >
                       <span className="material-symbols-outlined text-[18px]">download</span>
                       <span>Download Fixed Resume (.docx)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAutoFix}
-                      disabled={isFixing}
-                      className="text-[13px] font-medium py-3 px-5 rounded-2xl bg-white text-[#1d1d1f] hover:bg-[#f5f5f7] border border-black/[0.06] transition-all duration-300 cursor-pointer text-center active:scale-[0.98] flex items-center justify-center gap-1.5"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">refresh</span>
-                      <span>Re-generate with {allTemplates.find(t => t.id === selectedTemplateId)?.name || 'Selected Template'}</span>
                     </button>
                   </div>
                 </div>
