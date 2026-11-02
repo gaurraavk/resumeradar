@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminFetch, safeJson } from '../lib/apiClient';
+import { adminFetch, safeJson, clearAdminToken } from '../lib/apiClient';
 import { AdminAnalyticsData, UserProfile } from '../types';
 import {
   BarChart,
@@ -37,7 +37,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
         adminFetch('/api/v1/admin/users'),
       ]);
 
-      if (analyticsRes.status === 401 || analyticsRes.status === 403) {
+      if (analyticsRes.status === 401 || analyticsRes.status === 403 || usersRes.status === 401 || usersRes.status === 403) {
+        clearAdminToken();
         setError('Unauthorized or session expired. Please sign in again as admin.');
         setLoading(false);
         return;
@@ -151,7 +152,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             }`}
         >
           <span className="material-symbols-outlined text-[15px]">group</span>
-          Users ({users.length})
+          Users {!error && users.length > 0 ? `(${users.length})` : ''}
         </button>
         <button
           onClick={() => setActiveTab('activity')}
@@ -177,9 +178,29 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">error</span>
-          <span>{error}</span>
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{error}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {error.includes('Unauthorized') || error.includes('session expired') ? (
+              <button
+                onClick={onLogout}
+                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-medium rounded-xl transition-all cursor-pointer shadow-2xs"
+              >
+                Sign In Again
+              </button>
+            ) : (
+              <button
+                onClick={fetchData}
+                className="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 text-[12px] font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[14px]">refresh</span>
+                <span>Retry</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -194,6 +215,25 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       )}
 
       {/* ======================= OVERVIEW TAB ======================= */}
+      {!loading && activeTab === 'overview' && !analytics && error && (
+        <div className="macos-card p-12 rounded-3xl text-center space-y-4 border border-black/[0.06]">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-rose-50 text-rose-500">
+            <span className="material-symbols-outlined text-[28px]">cloud_off</span>
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold text-[#1d1d1f]">Unable to Load Analytics</h3>
+            <p className="text-[13px] text-neutral-500 max-w-md mx-auto">{error}</p>
+          </div>
+          <button
+            onClick={fetchData}
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-[#1d1d1f] text-white text-[13px] font-medium hover:bg-black transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+          >
+            <span className="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Retry Connection</span>
+          </button>
+        </div>
+      )}
+
       {!loading && activeTab === 'overview' && analytics && (
         <div className="space-y-6">
           {/* Top KPI Cards */}
@@ -401,12 +441,31 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               <h3 className="text-lg font-semibold text-[#1d1d1f]">Registered Users</h3>
               <p className="text-[12px] text-neutral-400">Latest 100 accounts registered on the platform</p>
             </div>
-            <span className="px-3 py-1 rounded-xl bg-indigo-50 text-indigo-700 text-[12px] font-semibold border border-indigo-200/50">
-              {users.length} Users Total
-            </span>
+            {!error && (
+              <span className="px-3 py-1 rounded-xl bg-indigo-50 text-indigo-700 text-[12px] font-semibold border border-indigo-200/50">
+                {users.length} Users Total
+              </span>
+            )}
           </div>
 
-          {users.length === 0 ? (
+          {error ? (
+            <div className="p-12 text-center space-y-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-rose-50 text-rose-500">
+                <span className="material-symbols-outlined text-[28px]">cloud_off</span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-base font-semibold text-[#1d1d1f]">Unable to Load Registered Users</h4>
+                <p className="text-[13px] text-neutral-500 max-w-md mx-auto">{error}</p>
+              </div>
+              <button
+                onClick={fetchData}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1d1d1f] text-white text-[12px] font-medium hover:bg-black transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[16px]">refresh</span>
+                <span>Retry Connection</span>
+              </button>
+            </div>
+          ) : users.length === 0 ? (
             <div className="p-12 text-center space-y-2">
               <span className="material-symbols-outlined text-[32px] text-neutral-400">group_off</span>
               <p className="text-[14px] text-neutral-500 font-medium">No users registered yet.</p>
@@ -462,7 +521,24 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             </span>
           </div>
 
-          {!analytics || analytics.recentAnalyses.length === 0 ? (
+          {error ? (
+            <div className="p-12 text-center space-y-4">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-rose-50 text-rose-500">
+                <span className="material-symbols-outlined text-[28px]">cloud_off</span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-base font-semibold text-[#1d1d1f]">Unable to Load Recent Activity</h4>
+                <p className="text-[13px] text-neutral-500 max-w-md mx-auto">{error}</p>
+              </div>
+              <button
+                onClick={fetchData}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1d1d1f] text-white text-[12px] font-medium hover:bg-black transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[16px]">refresh</span>
+                <span>Retry Connection</span>
+              </button>
+            </div>
+          ) : !analytics || analytics.recentAnalyses.length === 0 ? (
             <div className="p-12 text-center space-y-2">
               <span className="material-symbols-outlined text-[32px] text-neutral-400">history_toggle_off</span>
               <p className="text-[14px] text-neutral-500 font-medium">No recent analyses recorded yet.</p>

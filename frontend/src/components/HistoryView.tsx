@@ -107,9 +107,29 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">error</span>
-          <span>{error}</span>
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-[13px] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{error}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {error.includes('expired') || error.includes('sign in') ? (
+              <button
+                onClick={onNavigateToAuth}
+                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-medium rounded-xl transition-all cursor-pointer shadow-2xs"
+              >
+                Sign In Again
+              </button>
+            ) : (
+              <button
+                onClick={fetchHistory}
+                className="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 text-[12px] font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[14px]">refresh</span>
+                <span>Retry</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -120,6 +140,35 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             progress_activity
           </span>
           <p className="text-[14px] text-neutral-500 font-medium">Loading your scan history...</p>
+        </div>
+      )}
+
+      {/* Error State Card */}
+      {!loading && error && history.length === 0 && (
+        <div className="macos-card p-12 rounded-3xl text-center space-y-4 border border-black/[0.06]">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-rose-50 text-rose-500">
+            <span className="material-symbols-outlined text-[28px]">cloud_off</span>
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold text-[#1d1d1f]">Unable to Load Scan History</h3>
+            <p className="text-[13px] text-neutral-500 max-w-md mx-auto">{error}</p>
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={fetchHistory}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1d1d1f] text-white text-[13px] font-medium hover:bg-black transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+            >
+              <span className="material-symbols-outlined text-[16px]">refresh</span>
+              <span>Retry Connection</span>
+            </button>
+            <button
+              onClick={onNavigateToScanner}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-[#15263c]/12 text-[#15263c] text-[13px] font-medium hover:bg-neutral-50 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+            >
+              <span className="material-symbols-outlined text-[16px]">upload_file</span>
+              <span>Scan Resume Now</span>
+            </button>
+          </div>
         </div>
       )}
 
